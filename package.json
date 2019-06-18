@@ -22,7 +22,7 @@
     "@types/node": "^12.0.4",
     "bignumber.js": "^9.0.0",
     "ethereumjs-tx": "^2.0.0",
-    "jcc_wallet": "^0.3.9",
+    "jcc_wallet": "^0.4.0",
     "web3": "1.0.0-beta.34"
   },
   "devDependencies": {
