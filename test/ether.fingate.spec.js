@@ -13,7 +13,6 @@ describe('test EtherFingate', function() {
       inst.initEtherContract(config.ETHEREUM_ADDRESS);
       expect(inst.fingateAddress).to.equal(config.ETHEREUM_ADDRESS);
       expect(inst.etherContractInstance instanceof Contract).to.true;
-      expect(inst.etherDecimals).to.equal(18);
       expect(inst.etherGasLimit).to.equal(150000);
       inst.etherGasLimit = 1;
       expect(inst.etherGasLimit).to.equal(1);

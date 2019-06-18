@@ -141,7 +141,7 @@ export default class Erc20Fingate extends EthereumFingate {
     }
 
     /**
-     * submit transfer info to ether fingate contract 
+     * submit transfer info to ether fingate contract
      *
      * @param {string} jtAddress swtc address
      * @param {number} amount value of transfer

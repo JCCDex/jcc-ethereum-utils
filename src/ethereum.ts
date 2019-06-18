@@ -198,7 +198,7 @@ export default class Ethereum {
      *
      * @protected
      * @static
-     * @param {string} str 
+     * @param {string} str
      * @returns {string}
      * @memberof Ethereum
      */
@@ -371,7 +371,7 @@ export default class Ethereum {
      * @param {number} nonce nonce
      * @param {number} gasLimit gas limit
      * @param {number} gasPrice gas price
-     * @param {string} value value 
+     * @param {string} value value
      * @param {string} calldata call data
      * @returns {IEthereumTransaction}
      * @memberof Ethereum
