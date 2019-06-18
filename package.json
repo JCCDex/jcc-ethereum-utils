@@ -1,6 +1,6 @@
 {
   "name": "jcc-ethereum-utils",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Toolkit of crossing chain from Ethereum to SWTC chain",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -23,7 +23,7 @@
     "bignumber.js": "^9.0.0",
     "ethereumjs-tx": "^2.0.0",
     "jcc_wallet": "^0.3.9",
-    "web3": "^1.0.0-beta.34"
+    "web3": "1.0.0-beta.34"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
