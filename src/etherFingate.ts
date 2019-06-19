@@ -157,12 +157,12 @@ export default class EtherFingate extends Ethereum {
      *
      * @param {string} secret ethereum secret
      * @param {string} jingtumAddress jingtum address
-     * @param {number} amount deposit value
+     * @param {string} amount deposit value
      * @returns {Promise<string>} resolve hash if success
      * @memberof EtherFingate
      */
     @validate
-    public async deposit(@isValidEthereumSecret secret: string, @isValidJingtumAddress jingtumAddress: string, @isValidAmount amount: number): Promise<string> {
+    public async deposit(@isValidEthereumSecret secret: string, @isValidJingtumAddress jingtumAddress: string, @isValidAmount amount: string): Promise<string> {
         try {
             const address = Ethereum.getAddress(secret);
             const calldata = this._etherContractInstance.methods.deposit(jingtumAddress).encodeABI();

@@ -57,7 +57,7 @@ const ethereumAddress = '';
 const swtcAddress = '';
 
 // Deposit amount
-const amount = 1;
+const amount = "1";
 
 // Ethereum fingate contract address, don't change it.
 const scAddress = '0x3907acb4c1818adf72d965c08e0a79af16e7ffb8';

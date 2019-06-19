@@ -144,7 +144,7 @@ describe('test EtherFingate', function() {
       stub3.yields(null, "1");
       const stub4 = sandbox.stub(inst._web3.currentProvider, "sendAsync");
       stub4.yields(null, 0);
-      const hash = await inst.deposit(config.ETHEREUM_SECRET, config.JINGTUM_ADDRESS, 0.001);
+      const hash = await inst.deposit(config.ETHEREUM_SECRET, config.JINGTUM_ADDRESS, "0.001");
       expect(hash).to.equal("1");
       expect(stub3.calledOnceWith(config.MOCK_SIGN)).to.true;
     })

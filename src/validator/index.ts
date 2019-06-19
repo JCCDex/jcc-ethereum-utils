@@ -1,3 +1,4 @@
+import BigNumber from "bignumber.js";
 import * as ethWallet from "jcc_wallet/lib/eth";
 import * as jtWallet from "jcc_wallet/lib/jingtum";
 
@@ -60,7 +61,8 @@ export const validate = (target: any, name: string, descriptor: PropertyDescript
                         }
                         break;
                     case checkAmountKey:
-                        if (Number.isNaN(value) || !Number.isFinite(value) || value <= 0) {
+                        const bn = new BigNumber(value);
+                        if (!BigNumber.isBigNumber(bn) || !bn.isGreaterThan(0)) {
                             throw new Error(`${value} is invalid amount.`);
                         }
                         break;

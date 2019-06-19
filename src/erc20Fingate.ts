@@ -115,13 +115,13 @@ export default class Erc20Fingate extends EthereumFingate {
     /**
      * transfer token to erc20 contract address
      *
-     * @param {number} amount value of transfer
+     * @param {string} amount value of transfer
      * @param {string} secret ethereum secret
      * @returns {Promise<string>} resolve hash if success
      * @memberof Erc20Fingate
      */
     @validate
-    public async transfer(@isValidAmount amount: number, @isValidEthereumSecret secret: string): Promise<string> {
+    public async transfer(@isValidAmount amount: string, @isValidEthereumSecret secret: string): Promise<string> {
         try {
             if (!Number.isInteger(this._decimals) || this._decimals < 0) {
                 throw new Error("Please set value of _decimals");
@@ -144,14 +144,14 @@ export default class Erc20Fingate extends EthereumFingate {
      * submit transfer info to ether fingate contract
      *
      * @param {string} jtAddress swtc address
-     * @param {number} amount value of transfer
+     * @param {string} amount value of transfer
      * @param {string} hash transfer hash
      * @param {string} secret ethereum secret
      * @returns {Promise<string>} resolve hash if success
      * @memberof Erc20Fingate
      */
     @validate
-    public async depositToken(@isValidJingtumAddress jtAddress: string, @isValidAmount amount: number, @isValidHash hash: string, @isValidEthereumSecret secret: string): Promise<string> {
+    public async depositToken(@isValidJingtumAddress jtAddress: string, @isValidAmount amount: string, @isValidHash hash: string, @isValidEthereumSecret secret: string): Promise<string> {
         try {
             if (!Number.isInteger(this._decimals) || this._decimals < 0) {
                 throw new Error("Please set value of _decimals");

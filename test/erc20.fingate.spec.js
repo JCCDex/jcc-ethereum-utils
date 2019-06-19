@@ -87,7 +87,7 @@ describe('test EtherFingate', function() {
     })
 
     it('amount is invalid', function done() {
-      expect(() => inst.transfer(0, config.ETHEREUM_SECRET)).throw(`0 is invalid amount.`)
+      expect(() => inst.transfer("-1", config.ETHEREUM_SECRET)).throw(`-1 is invalid amount.`)
     })
 
     it('moac secret is invalid', function() {
@@ -134,7 +134,7 @@ describe('test EtherFingate', function() {
       const stub4 = sandbox.stub(inst._web3.currentProvider, "sendAsync");
       stub4.yields(null, 0);
       inst.decimals = 18;
-      const hash = await inst.transfer(1, config.ETHEREUM_SECRET);
+      const hash = await inst.transfer("1", config.ETHEREUM_SECRET);
       expect(hash).to.equal("1");
       expect(stub3.calledOnceWith(config.MOCK_TRANSFER_SIGN)).to.true;
     })
@@ -152,7 +152,7 @@ describe('test EtherFingate', function() {
     })
 
     it('amount is invalid', function done() {
-      expect(() => inst.depositToken(config.JINGTUM_ADDRESS, 0, config.MOCK_HASH, config.ETHEREUM_SECRET)).throw(`0 is invalid amount.`)
+      expect(() => inst.depositToken(config.JINGTUM_ADDRESS, "0", config.MOCK_HASH, config.ETHEREUM_SECRET)).throw(`0 is invalid amount.`)
     })
 
     it('moac secret is invalid', function() {
@@ -202,7 +202,7 @@ describe('test EtherFingate', function() {
       stub3.yields(null, config.MOCK_HASH);
       const stub4 = sandbox.stub(inst._web3.currentProvider, "sendAsync");
       stub4.yields(null, 0);
-      const hash = await inst.depositToken(config.JINGTUM_ADDRESS, 0.1, config.MOCK_TRANSFER_HASH, config.ETHEREUM_SECRET);
+      const hash = await inst.depositToken(config.JINGTUM_ADDRESS, "0.1", config.MOCK_TRANSFER_HASH, config.ETHEREUM_SECRET);
       expect(hash).to.equal(config.MOCK_HASH);
       expect(stub3.calledOnceWith(config.MOCK_DEPOSITTOKEN_SIGN)).to.true;
     })
