@@ -34,6 +34,14 @@ e.g. you transfer 1 `eth` to [Ethereum Fingate](https://etherscan.io/address/0x3
 npm i jcc-ethereum-utils
 ```
 
+## CDN
+
+`jcc_ethereum_utils` as a global variable
+
+```javascript
+<script src="https://unpkg.com/jcc-ethereum-utils/dist/jcc-ethereum-utils.min.js"></script>
+```
+
 ## Usage
 
 ```javascript
