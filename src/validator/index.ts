@@ -41,6 +41,7 @@ export const validate = (target: any, name: string, descriptor: PropertyDescript
 
     descriptor.value = function () {
         const params = target[router][name].params;
+        /* istanbul ignore else */
         if (Array.isArray(params)) {
             const length = params.length;
             for (let index = 0; index < length; index++) {

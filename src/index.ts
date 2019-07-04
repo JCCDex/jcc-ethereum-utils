@@ -1,9 +1,9 @@
-import Erc20Fingate from "./erc20Fingate";
+import ERC20 from "./erc20";
 import Ethereum from "./ethereum";
-import EtherFingate from "./etherFingate";
+import Fingate from "./fingate";
 
 export {
-    Erc20Fingate,
+    ERC20,
     Ethereum,
-    EtherFingate
+    Fingate
 };

@@ -196,13 +196,12 @@ export default class Ethereum {
     /**
      * prefix `0x` if the given string not start with `0x`
      *
-     * @protected
      * @static
      * @param {string} str
      * @returns {string}
      * @memberof Ethereum
      */
-    protected static prefix0x(str: string): string {
+    public static prefix0x(str: string): string {
         if (str && !str.startsWith("0x")) {
             str = "0x" + str;
         }
@@ -212,13 +211,12 @@ export default class Ethereum {
     /**
      * filter `0x` if the given string starts with `0x`
      *
-     * @protected
      * @static
      * @param {string} str
      * @returns {string}
      * @memberof Ethereum
      */
-    protected static filter0x(str: string): string {
+    public static filter0x(str: string): string {
         if (typeof str !== "string") {
             return str;
         }
@@ -241,7 +239,7 @@ export default class Ethereum {
      *
      * @memberof Ethereum
      */
-    public clearWeb3() {
+    public destroyWeb3() {
         try {
             this._web3.setProvider(null);
         } catch (error) {
@@ -426,26 +424,24 @@ export default class Ethereum {
     /**
      * init instance of ethereum or erc20 contract
      *
-     * @protected
      * @param {abitItem} abi definition of ethereum abi or erc20 abi
      * @param {string} address
      * @returns {Contract} return instance of ethereum or erc20 contract
      * @memberof Ethereum
      */
-    protected contract(abi: abitItem, address: string): Contract {
+    public contract(abi: abitItem, address: string): Contract {
         return new this._web3.eth.Contract(abi, address);
     }
 
     /**
      * check instance of contract if initialied
      *
-     * @protected
      * @param {Contract} contract current contract instance
      * @param {string} address current contract address
      * @returns {boolean} return true if initialied
      * @memberof Ethereum
      */
-    protected contractInitialied(contract: Contract, address: string): boolean {
+    public contractInitialied(contract: Contract, address: string): boolean {
         return contract instanceof Contract && contract._address.toLowerCase() === address.toLowerCase();
     }
 }

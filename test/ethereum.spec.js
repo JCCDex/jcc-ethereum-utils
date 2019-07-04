@@ -18,7 +18,7 @@ describe('test Ethereum', function() {
     });
   })
 
-  describe("test getWeb3、initWeb3 & clearWeb3", function() {
+  describe("test getWeb3、initWeb3 & destroyWeb3", function() {
     it("should be which we want", function() {
       let inst = new Ethereum(config.MOCK_NODE, true);
       inst.initWeb3();
@@ -26,7 +26,7 @@ describe('test Ethereum', function() {
       expect(inst.getWeb3()).to.equal(web3);
       inst.initWeb3();
       expect(inst.getWeb3()).to.equal(web3);
-      inst.clearWeb3();
+      inst.destroyWeb3();
       expect(inst._web3).to.equal(null);
       inst.initWeb3();
       expect(inst._web3).to.not.equal(web3);
