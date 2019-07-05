@@ -3,6 +3,7 @@
 # API of Ethereum
 
 ```javascript
+
 /**
  * instance of web3
  *
@@ -11,6 +12,7 @@
  * @memberof Ethereum
  */
 protected _web3: any;
+
 /**
  * http node
  *
@@ -19,6 +21,7 @@ protected _web3: any;
  * @memberof Ethereum
  */
 private _node;
+
 /**
  * ethereum network
  *
@@ -27,6 +30,7 @@ private _node;
  * @memberof Ethereum
  */
 private _network;
+
 /**
  * production network
  *
@@ -35,6 +39,7 @@ private _network;
  * @memberof Ethereum
  */
 private readonly MAINNET;
+
 /**
  * test network
  *
@@ -43,6 +48,7 @@ private readonly MAINNET;
  * @memberof Ethereum
  */
 private readonly TESTNET;
+
 /**
  * gas limit
  *
@@ -51,6 +57,7 @@ private readonly TESTNET;
  * @memberof Ethereum
  */
 private _gasLimit;
+
 /**
  * min gas price
  *
@@ -59,6 +66,7 @@ private _gasLimit;
  * @memberof Ethereum
  */
 private _minGasPrice;
+
 /**
  * default gas price
  *
@@ -67,6 +75,7 @@ private _minGasPrice;
  * @memberof Ethereum
  */
 private _defaultGasPrice;
+
 /**
  * set & get _gasLimit
  *
@@ -74,6 +83,7 @@ private _defaultGasPrice;
  * @memberof Ethereum
  */
 gasLimit: number;
+
 /**
  * set & get _minGasPrice
  *
@@ -81,12 +91,14 @@ gasLimit: number;
  * @memberof Ethereum
  */
 minGasPrice: number;
+
 /**
  * set & get _defaultGasPrice
  *
  * @memberof Ethereum
  */
 defaultGasPrice: number;
+
 /**
  * validate ethereum address
  *
@@ -96,6 +108,7 @@ defaultGasPrice: number;
  * @memberof Ethereum
  */
 static isValidAddress(address: string): boolean;
+
 /**
  * validate ethereum secret
  *
@@ -105,6 +118,7 @@ static isValidAddress(address: string): boolean;
  * @memberof Ethereum
  */
 static isValidSecret(secret: string): boolean;
+
 /**
  * retrieve ethereum address via secret
  *
@@ -114,6 +128,7 @@ static isValidSecret(secret: string): boolean;
  * @memberof Ethereum
  */
 static getAddress(secret: string): string;
+
 /**
  * create ethereum wallet
  *
@@ -122,6 +137,7 @@ static getAddress(secret: string): string;
  * @memberof Ethereum
  */
 static createWallet(): IWalletModel;
+
 /**
  * prefix `0x` if the given string not start with `0x`
  *
@@ -131,6 +147,7 @@ static createWallet(): IWalletModel;
  * @memberof Ethereum
  */
 static prefix0x(str: string): string;
+
 /**
  * filter `0x` if the given string starts with `0x`
  *
@@ -140,24 +157,28 @@ static prefix0x(str: string): string;
  * @memberof Ethereum
  */
 static filter0x(str: string): string;
+
 /**
  * init instance of web3
  *
  * @memberof Ethereum
  */
 initWeb3(): void;
+
 /**
  * destroy instance of web3
  *
  * @memberof Ethereum
  */
 destroyWeb3(): void;
+
 /**
  * get instance of web3
  *
  * @memberof Ethereum
  */
 getWeb3(): any;
+
 /**
  * request balance of ether
  *
@@ -166,6 +187,7 @@ getWeb3(): any;
  * @memberof Ethereum
  */
 getBalance(address: string): Promise<string>;
+
 /**
  * request current gas price
  *
@@ -173,6 +195,7 @@ getBalance(address: string): Promise<string>;
  * @memberof Ethereum
  */
 getGasPrice(): Promise<number>;
+
 /**
  * request nonce
  *
@@ -181,6 +204,7 @@ getGasPrice(): Promise<number>;
  * @memberof Ethereum
  */
 getNonce(address: string): Promise<number>;
+
 /**
  * check if has pending transaction
  *
@@ -189,6 +213,7 @@ getNonce(address: string): Promise<number>;
  * @memberof Ethereum
  */
 hasPendingTransactions(address: string): Promise<boolean>;
+
 /**
  * format transaction info
  *
@@ -202,6 +227,7 @@ hasPendingTransactions(address: string): Promise<boolean>;
  * @memberof Ethereum
  */
 getTx(to: string, nonce: number, gasLimit: number, gasPrice: number, value: string, calldata: string): IEthereumTransaction;
+
 /**
  * sign transaction with ethereum secret
  *
@@ -211,6 +237,7 @@ getTx(to: string, nonce: number, gasLimit: number, gasPrice: number, value: stri
  * @memberof Ethereum
  */
 signTransaction(tx: IEthereumTransaction, secret: string): string;
+
 /**
  * send signed transaction
  *
@@ -219,6 +246,7 @@ signTransaction(tx: IEthereumTransaction, secret: string): string;
  * @memberof Ethereum
  */
 sendSignedTransaction(sign: string): Promise<string>;
+
 /**
  * init instance of ethereum or erc20 contract
  *
@@ -228,6 +256,7 @@ sendSignedTransaction(sign: string): Promise<string>;
  * @memberof Ethereum
  */
 contract(abi: abitItem, address: string): Contract;
+
 /**
  * check instance of contract if initialied
  *
@@ -252,6 +281,7 @@ contractInitialied(contract: Contract, address: string): boolean;
  * @memberof ERC20
  */
 private _contract;
+
 /**
  * instance of Ethereum
  *
@@ -260,6 +290,7 @@ private _contract;
  * @memberof ERC20
  */
 private _ethereum;
+
 /**
  * contract address of erc20 token
  *
@@ -268,6 +299,7 @@ private _ethereum;
  * @memberof ERC20
  */
 private _address;
+
 /**
  * init instance of erc20 contract
  *
@@ -275,12 +307,14 @@ private _address;
  * @memberof ERC20
  */
 init(contractAddress: string, ethereum: Ethereum): void;
+
 /**
  * destroy instance of erc20 contract
  *
  * @memberof ERC20
  */
 destroy(): void;
+
 /**
  * request decimals of erc20 token
  *
@@ -288,6 +322,7 @@ destroy(): void;
  * @memberof ERC20
  */
 decimals(): Promise<number>;
+
 /**
  * request balance of erc20 token
  *
@@ -296,6 +331,7 @@ decimals(): Promise<number>;
  * @memberof ERC20
  */
 balanceOf(address: string): Promise<string>;
+
 /**
  * transfer token to erc20 contract address
  *
@@ -312,6 +348,7 @@ transfer(secret: string, to: string, amount: string): Promise<string>;
 # API of Fingate
 
 ```javascript
+
 /**
  * instance of contract
  *
@@ -320,6 +357,7 @@ transfer(secret: string, to: string, amount: string): Promise<string>;
  * @memberof Fingate
  */
 private _contract;
+
 /**
  * instance of Ethereum
  *
@@ -328,6 +366,7 @@ private _contract;
  * @memberof Fingate
  */
 private _ethereum;
+
 /**
  * fingate address
  *
@@ -336,6 +375,7 @@ private _ethereum;
  * @memberof Fingate
  */
 private _address;
+
 /**
  * ether gas limit
  *
@@ -344,12 +384,14 @@ private _address;
  * @memberof Fingate
  */
 private _etherGasLimit;
+
 /**
  * set & get _etherGasLimit
  *
  * @memberof EtherFingate
  */
 etherGasLimit: number;
+
 /**
  * init erc20 contract
  *
@@ -358,12 +400,14 @@ etherGasLimit: number;
  * @memberof Erc20Fingate
  */
 init(fingateAddress: string, ethereum: Ethereum): void;
+
 /**
  * destroy instance of contract
  *
  * @memberof Fingate
  */
 destroy(): void;
+
 /**
  * check state if pending
  *
@@ -372,6 +416,7 @@ destroy(): void;
  * @memberof Fingate
  */
 isPending(state: Array<BigNumber | string>): boolean;
+
 /**
  * request deposit state
  *
@@ -381,6 +426,7 @@ isPending(state: Array<BigNumber | string>): boolean;
  * @memberof Fingate
  */
 depositState(address: string, contractAddress?: string): Promise<Array<BigNumber | string>>;
+
 /**
  * deposit ether
  *
@@ -391,6 +437,7 @@ depositState(address: string, contractAddress?: string): Promise<Array<BigNumber
  * @memberof Fingate
  */
 deposit(secret: string, jingtumAddress: string, amount: string): Promise<string>;
+
 /**
  * deposit erc20 token
  *
@@ -404,4 +451,5 @@ deposit(secret: string, jingtumAddress: string, amount: string): Promise<string>
  * @memberof Fingate
  */
 depositToken(jtAddress: string, tokenAddress: string, decimals: number, amount: string, hash: string, secret: string): Promise<string>;
+
 ```
