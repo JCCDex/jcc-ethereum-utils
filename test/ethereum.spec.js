@@ -5,7 +5,7 @@ const sinon = require('sinon');
 const sandbox = sinon.createSandbox();
 const config = require("./config");
 const Contract = require("web3-eth-contract");
-const etherABI = require("../lib/abi/etherABI").default;
+const fingateABI = require("../lib/abi/fingateABI").default;
 
 describe('test Ethereum', function() {
   describe('test constructor', function() {
@@ -297,8 +297,8 @@ describe('test Ethereum', function() {
       let inst = new Ethereum(config.MOCK_NODE, true);
       inst.initWeb3();
       const spy = sandbox.spy(inst._web3.eth, "Contract");
-      let contract = inst.contract(etherABI, config.ETHEREUM_ADDRESS);
-      expect(spy.calledOnceWith(etherABI, config.ETHEREUM_ADDRESS)).to.true;
+      let contract = inst.contract(fingateABI, config.ETHEREUM_ADDRESS);
+      expect(spy.calledOnceWith(fingateABI, config.ETHEREUM_ADDRESS)).to.true;
       expect(contract instanceof Contract).to.true;
     })
   })
@@ -357,7 +357,7 @@ describe('test Ethereum', function() {
     it("return true", function() {
       let inst = new Ethereum(config.MOCK_NODE, true);
       inst.initWeb3();
-      let contract = inst.contract(etherABI, config.ETHEREUM_ADDRESS);
+      let contract = inst.contract(fingateABI, config.ETHEREUM_ADDRESS);
       expect(inst.contractInitialied(contract, config.ETHEREUM_ADDRESS)).to.true;
     })
 

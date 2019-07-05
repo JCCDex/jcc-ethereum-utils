@@ -20,7 +20,7 @@ const config = {
       "keccak": path.resolve(__dirname, "node_modules/keccak"),
       "uuid": path.resolve(__dirname, "node_modules/uuid"),
       "bn.js": path.resolve(__dirname, "node_modules/bn.js"),
-      "base-x": path.resolve(__dirname, "node_modules/bs58/node_modules/base-x"),
+      "base-x": path.resolve(__dirname, "node_modules/base-x"),
       "eth-lib": path.resolve(__dirname, "node_modules/web3-eth-accounts/node_modules/eth-lib")
     }
   },
