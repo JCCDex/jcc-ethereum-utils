@@ -134,3 +134,7 @@ try {
     console.log(error);
 }
 ```
+
+## API
+
+see [API.md](https://github.com/JCCDex/jcc-ethereum-utils/blob/master/docs/API.md)
