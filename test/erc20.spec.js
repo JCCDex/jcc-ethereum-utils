@@ -30,11 +30,8 @@ describe('test EtherFingate', function() {
     const ethereum = new Ethereum(config.MOCK_NODE, true);
     ethereum.initWeb3();
     inst.init(config.ETHEREUM_ADDRESS, ethereum);
-    const spy = sandbox.spy(inst._ethereum, "destroyWeb3");
     inst.destroy();
-    expect(spy.calledOnce).to.true;
     expect(inst._contract).to.equal(null);
-    sandbox.restore();
   })
 
   describe("test balanceOf", function() {

@@ -36,7 +36,7 @@ npm i jcc-ethereum-utils
 
 ## CDN
 
-`jcc_ethereum_utils` as a global variable
+`jcc_ethereum_utils` as a global variable.
 
 ```javascript
 <script src="https://unpkg.com/jcc-ethereum-utils/dist/jcc-ethereum-utils.min.js"></script>
@@ -44,10 +44,11 @@ npm i jcc-ethereum-utils
 
 ## Usage
 
-```javascript
+Breaking changes since 0.1.4, if you used 0.1.3 see [this demo](https://github.com/JCCDex/jcc-ethereum-utils/blob/master/docs/demo_below_0.1.4.md).
 
+```javascript
 // demo
-import { EtherFingate, Erc20Fingate } from "jcc-ethereum-utils";
+import { Fingate, Ethereum, ERC20 } from "jcc-ethereum-utils";
 
 // Ethereum node
 const node = "https://eth626892d.jccdex.cn";
@@ -72,18 +73,21 @@ const scAddress = '0x3907acb4c1818adf72d965c08e0a79af16e7ffb8';
 
 try {
     // deposit 1 ETH
-    const inst = new EtherFingate(node, production);
-    inst.initEtherContract(scAddress);
+    const ethereumInstance = new Ethereum(node, true);
+    ethereumInstance.initWeb3();
+
+    const fingateInstance = new Fingate();
+    fingateInstance.init(scAddress, ethereumInstance);
 
     // Check if has pending order, if has don't call the next deposit api
-    const state = await inst.depositState(moacAddress);
+    const state = await fingateInstance.depositState(ethereumAddress);
 
-    if (inst.isPending(state)) {
+    if (fingateInstance.isPending(state)) {
         return;
     }
 
     // start to transfer 1 ETH to fingate address
-    const hash = await inst.deposit(ethereumSecret, swtcAddress, amount);
+    const hash = await fingateInstance.deposit(ethereumSecret, swtcAddress, amount);
     console.log(hash);
 } catch (error) {
     console.log(error);
@@ -97,24 +101,29 @@ try {
     // JCC contract address
     const jccContractAddress = "0x9BD4810a407812042F938d2f69f673843301cfa6";
 
-    const inst = new Erc20Fingate(node, production);
+   const ethereumInstance = new Ethereum(node, true);
+   ethereumInstance.initWeb3();
 
-    inst.initErc20Contract(scAddress, jccContractAddress);
+   const erc20Instance = new ERC20();
+   erc20Instance.init(jcContract, ethereumInstance);
+
+   const fingateInstance = new Fingate();
+   fingateInstance.init(scAddress, ethereumInstance);
 
     // Check if has pending order, if has don't call transfer api
-    const state = await inst.depositState(ethereumAddress, jccContractAddress);
+    const state = await fingateInstance.depositState(ethereumAddress, jccContractAddress);
 
-    if (inst.isPending(state)) {
+    if (fingateInstance.isPending(state)) {
         return;
     }
-    // Please set decimals of erc20 token, if not will throw an error.
-    inst.decimals = 18;
 
-    // The first step to transfer 1 JCC to jcc contract address.
-    const transferHash = await inst.transfer(amount, secret);
+    const decimals = await erc20Instance.decimals();
+
+    // The first step to transfer 1 JCC to fingate address.
+    const transferHash = await erc20Instance.transfer(ethereumAddress, scAddress, amount);
 
     // The next step to submit previous transfer hash.
-    const depositHash = await inst.depositToken(swtcAddress, amount, transferHash, ethereumSecret);
+    const depositHash = await fingateInstance.depositToken(swtcAddress, jccContractAddress, decimals, amount, transferHash, ethereumSecret);
     console.log(depositHash);
 
     // Warning:
@@ -124,5 +133,4 @@ try {
 } catch (error) {
     console.log(error);
 }
-
 ```

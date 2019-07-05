@@ -101,7 +101,6 @@ export default class Fingate {
      */
     public destroy() {
         this._contract = null;
-        this._ethereum.destroyWeb3();
     }
 
     /**

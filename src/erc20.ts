@@ -75,7 +75,6 @@ export default class ERC20 {
      */
     public destroy() {
         this._contract = null;
-        this._ethereum.destroyWeb3();
     }
 
     /**
