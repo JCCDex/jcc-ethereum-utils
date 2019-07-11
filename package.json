@@ -85,5 +85,6 @@
   "files": [
     "lib",
     "dist"
-  ]
+  ],
+  "sideEffects": false
 }

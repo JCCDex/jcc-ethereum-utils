@@ -120,7 +120,7 @@ try {
     const decimals = await erc20Instance.decimals();
 
     // The first step to transfer 1 JCC to fingate address.
-    const transferHash = await erc20Instance.transfer(ethereumAddress, scAddress, amount);
+    const transferHash = await erc20Instance.transfer(ethereumSecret, scAddress, amount);
 
     // The next step to submit previous transfer hash.
     const depositHash = await fingateInstance.depositToken(swtcAddress, jccContractAddress, decimals, amount, transferHash, ethereumSecret);
