@@ -67,7 +67,8 @@ const erc20ABI = [{
     "inputs": [],
     "name": "decimals",
     "outputs": [{ "name": "", "type": "uint8" }],
-    "type": "function"
+    "type": "function",
+    "stateMutability": "view",
 }, {
     "constant": false,
     "inputs": [{
