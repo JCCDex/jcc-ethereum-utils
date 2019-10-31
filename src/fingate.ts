@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
-import * as Contract from "web3-eth-contract";
 import fingateABI from "./abi/fingateABI";
 import Ethereum from "./ethereum";
+import SmartContract from "./smartContract";
 import { isValidAmount, isValidEthereumAddress, isValidEthereumSecret, isValidHash, isValidJingtumAddress, validate } from "./validator";
 
 /**
@@ -11,34 +11,16 @@ import { isValidAmount, isValidEthereumAddress, isValidEthereumSecret, isValidHa
  * @class Erc20Fingate
  * @extends {EthereumFingate}
  */
-export default class Fingate {
+class Fingate extends SmartContract {
+
 
     /**
-     * instance of contract
-     *
-     * @private
-     * @type {Contract}
+     * Creates an instance of ERC20
      * @memberof Fingate
      */
-    private _contract: Contract;
-
-    /**
-     * instance of Ethereum
-     *
-     * @private
-     * @type {Ethereum}
-     * @memberof Fingate
-     */
-    private _ethereum: Ethereum;
-
-    /**
-     * fingate address
-     *
-     * @private
-     * @type {string}
-     * @memberof Fingate
-     */
-    private _address: string;
+    constructor() {
+        super();
+    }
 
     /**
      * ether gas limit
@@ -48,17 +30,6 @@ export default class Fingate {
      * @memberof Fingate
      */
     private _etherGasLimit: number;
-
-    /**
-     * Creates an instance of Fingate.
-     * @memberof Fingate
-     */
-    constructor() {
-        this._contract = null;
-        this._ethereum = null;
-        this._address = null;
-        this._etherGasLimit = 150000;
-    }
 
     /**
      * set & get _etherGasLimit
@@ -83,13 +54,8 @@ export default class Fingate {
     @validate
     public init(@isValidEthereumAddress fingateAddress: string, ethereum: Ethereum) {
         try {
-            if (!ethereum.contractInitialied(this._contract, fingateAddress)) {
-                this._address = fingateAddress;
-                this._ethereum = ethereum;
-                this._contract = ethereum.contract(fingateABI, this._address);
-            }
+            super.init(fingateAddress, ethereum, fingateABI);
         } catch (e) {
-            /* istanbul ignore next */
             throw e;
         }
     }
@@ -100,7 +66,7 @@ export default class Fingate {
      * @memberof Fingate
      */
     public destroy() {
-        this._contract = null;
+        super.destroy();
     }
 
     /**
@@ -127,7 +93,7 @@ export default class Fingate {
         return new Promise(async (resolve, reject) => {
             try {
                 address = Ethereum.prefix0x(address);
-                const state = await this._contract.methods.depositState(contractAddress, address).call();
+                const state = await super.callABI("depositState", contractAddress);
                 return resolve(state);
             } catch (error) {
                 return reject(error);
@@ -146,19 +112,21 @@ export default class Fingate {
      */
     @validate
     public async deposit(@isValidEthereumSecret secret: string, @isValidJingtumAddress jingtumAddress: string, @isValidAmount amount: string): Promise<string> {
-        try {
-            const address = Ethereum.getAddress(secret);
-            const calldata = this._contract.methods.deposit(jingtumAddress).encodeABI();
-            const gasPrice = await this._ethereum.getGasPrice();
-            const nonce = await this._ethereum.getNonce(address);
-            const value = this._ethereum.getWeb3().utils.numberToHex(this._ethereum.getWeb3().utils.toWei(new BigNumber(amount).toString(10), "ether"));
-            const tx = this._ethereum.getTx(this._address, nonce, this.etherGasLimit, gasPrice, value, calldata);
-            const sign = this._ethereum.signTransaction(tx, secret);
-            const hash = await this._ethereum.sendSignedTransaction(sign);
-            return hash;
-        } catch (err) {
-            throw err;
-        }
+        return new Promise(async (resolve, reject) => {
+            try {
+                const address = Ethereum.getAddress(secret);
+                const calldata = await super.callABI("deposit", jingtumAddress);
+                const gasPrice = await this.ethereum.getGasPrice();
+                const nonce = await this.ethereum.getNonce(address);
+                const value = this.ethereum.getWeb3().utils.numberToHex(this.ethereum.getWeb3().utils.toWei(new BigNumber(amount).toString(10), "ether"));
+                const tx = this.ethereum.getTx(this.contract.address, nonce, this.etherGasLimit, gasPrice, value, calldata);
+                const sign = this.ethereum.signTransaction(tx, secret);
+                const hash = await this.ethereum.sendSignedTransaction(sign);
+                return resolve(hash);
+            } catch (error) {
+                return reject(error);
+            }
+        });
     }
 
     /**
@@ -175,18 +143,21 @@ export default class Fingate {
      */
     @validate
     public async depositToken(@isValidJingtumAddress jtAddress: string, @isValidEthereumAddress tokenAddress: string, decimals: number, @isValidAmount amount: string, @isValidHash hash: string, @isValidEthereumSecret secret: string): Promise<string> {
-        try {
-            const address = Ethereum.getAddress(secret);
-            const value = this._ethereum.getWeb3().utils.toHex(new BigNumber(amount).multipliedBy(10 ** decimals).toString(10));
-            const gasPrice = await this._ethereum.getGasPrice();
-            const nonce = await this._ethereum.getNonce(address);
-            const calldata = this._contract.methods.depositToken(jtAddress, tokenAddress, value, hash).encodeABI();
-            const tx = this._ethereum.getTx(this._address, nonce, 450000, gasPrice, "0x00", calldata);
-            const sign = this._ethereum.signTransaction(tx, secret);
-            const depositHash = await this._ethereum.sendSignedTransaction(sign);
-            return depositHash;
-        } catch (error) {
-            throw error;
-        }
+        return new Promise(async (resolve, reject) => {
+            try {
+                const value = new BigNumber(amount).multipliedBy(10 ** decimals);
+                const address = Ethereum.getAddress(secret);
+                const nonce = await this.ethereum.getNonce(address);
+                const gasPrice = await this.ethereum.getGasPrice();
+                const calldata = await super.callABI("depositToken", jtAddress, tokenAddress, value, hash);
+                const tx = this.ethereum.getTx(this.contract.address, nonce, 450000, gasPrice, "0x00", calldata);
+                const sign = this.ethereum.signTransaction(tx, secret);
+                const txHash = await this.ethereum.sendSignedTransaction(sign);
+                return resolve(txHash);
+            } catch (error) {
+                return reject(error);
+            }
+        });
     }
 }
+export default Fingate;

@@ -121,13 +121,13 @@ class SmartContract {
      *
      */
     public async callABI(name, ...args) {
-        const abiItem = this._ethereumABI.getAbiItem.call(null, name, ...args);
+        const abiItem = this._ethereumABI.getAbiItem.apply(null, [name, ...args]);
         const { stateMutability } = abiItem;
 
         if (stateMutability === "view" || stateMutability === "pure") {
-            return await this._contract.methods[name].call();
+            return await this._contract.methods[name].apply(null, args).call();
         }
-        return this._ethereumABI.encode.call(name, ...args);
+        return this._ethereumABI.encode.apply(null, [name, ...args]);
     }
 }
 
