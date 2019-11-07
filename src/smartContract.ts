@@ -1,6 +1,7 @@
-import * as Contract from "web3-eth-contract";
 import EthereumABI from "jcc-ethereum-abi";
+import * as Contract from "web3-eth-contract";
 import Ethereum from "./ethereum";
+
 /**
  * toolkit of smart contract
  *

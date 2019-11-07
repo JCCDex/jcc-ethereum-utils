@@ -13,15 +13,6 @@ import { isValidAmount, isValidEthereumAddress, isValidEthereumSecret, isValidHa
  */
 class Fingate extends SmartContract {
 
-
-    /**
-     * Creates an instance of ERC20
-     * @memberof Fingate
-     */
-    constructor() {
-        super();
-    }
-
     /**
      * ether gas limit
      *
@@ -30,6 +21,14 @@ class Fingate extends SmartContract {
      * @memberof Fingate
      */
     private _etherGasLimit: number;
+
+    /**
+     * Creates an instance of ERC20
+     * @memberof Fingate
+     */
+    constructor() {
+        super();
+    }
 
     /**
      * set & get _etherGasLimit
@@ -160,4 +159,5 @@ class Fingate extends SmartContract {
         });
     }
 }
+
 export default Fingate;
