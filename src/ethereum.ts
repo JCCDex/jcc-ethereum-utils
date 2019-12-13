@@ -3,11 +3,11 @@ import BigNumber from "bignumber.js";
 
 import * as ethWallet from "jcc_wallet/lib/eth";
 import { IWalletModel } from "jcc_wallet/lib/model";
-import * as Contract from "web3-eth-contract";
-import { AbiItem as abitItem } from "web3-utils";
+import { Contract } from "web3-eth-contract";
 import { IEthereumTransaction } from "./model/transaction";
 const web3 = require("web3");
 const ethereumTx = require("ethereumjs-tx").Transaction;
+const contractClass = require("web3-eth-contract");
 
 /**
  * Toolkit of Ethereum
@@ -429,7 +429,7 @@ export default class Ethereum {
      * @returns {Contract} return instance of ethereum or erc20 contract
      * @memberof Ethereum
      */
-    public contract(abi: abitItem, address: string): Contract {
+    public contract(abi, address: string): Contract {
         return new this._web3.eth.Contract(abi, address);
     }
 
@@ -442,6 +442,6 @@ export default class Ethereum {
      * @memberof Ethereum
      */
     public contractInitialied(contract: Contract, address: string): boolean {
-        return contract instanceof Contract && contract._address.toLowerCase() === address.toLowerCase();
+        return contract instanceof contractClass && contract.options.address.toLowerCase() === address.toLowerCase();
     }
 }

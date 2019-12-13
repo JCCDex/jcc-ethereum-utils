@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import * as Contract from "web3-eth-contract";
+import { Contract } from "web3-eth-contract";
 import fingateABI from "./abi/fingateABI";
 import Ethereum from "./ethereum";
 import { isValidAmount, isValidEthereumAddress, isValidEthereumSecret, isValidHash, isValidJingtumAddress, validate } from "./validator";

@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import * as Contract from "web3-eth-contract";
+import { Contract } from "web3-eth-contract";
 import erc20ABI from "./abi/erc20ABI";
 import Ethereum from "./ethereum";
 import { isValidAmount, isValidEthereumAddress, isValidEthereumSecret, validate } from "./validator";
