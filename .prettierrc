@@ -1,4 +1,4 @@
 {
-  "tabWidth": 4,
-  "printWidth": 360
+  "printWidth": 360,
+  "arrowParens": "always"
 }

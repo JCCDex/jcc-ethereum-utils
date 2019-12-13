@@ -14,7 +14,8 @@
     "test:browser": "tsc && karma start karma.conf.js",
     "tslint": "tslint --project tsconfig.json --config tslint.json",
     "watch:tslint": "gulp dev",
-    "compile": "./compile.sh"
+    "compile": "./compile.sh",
+    "pretty": "prettier --write {src,test}/**/*.{js,ts}"
   },
   "author": "JCCDex",
   "license": "Apache-2.0",
