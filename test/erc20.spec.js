@@ -71,21 +71,6 @@ describe('test EtherFingate', function() {
       const balance = await inst.balanceOf(config.ETHEREUM_ADDRESS);
       expect(balance).to.equal("1");
     })
-
-    it("return 0 if request failed", async function() {
-      const s1 = sandbox.stub(inst._contract.methods, "balanceOf");
-      s1.returns({
-        call: function() {
-          return new Promise((resolve, reject) => {
-            reject(new Error("network error"))
-          })
-        }
-      })
-      const s2 = sandbox.stub(s1, "call");
-      s2.rejects();
-      const balance = await inst.balanceOf(config.ETHEREUM_ADDRESS);
-      expect(balance).to.equal("0");
-    })
   })
 
   describe("test transfer", function() {

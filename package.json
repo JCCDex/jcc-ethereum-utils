@@ -22,6 +22,7 @@
     "@types/node": "^12.12.17",
     "bignumber.js": "^9.0.0",
     "ethereumjs-tx": "^2.1.1",
+    "jcc-ethereum-abi": "^0.1.1",
     "jcc_wallet": "^1.0.3",
     "web3": "^1.2.4"
   },
@@ -29,6 +30,7 @@
     "@babel/cli": "^7.7.5",
     "@babel/core": "^7.7.5",
     "@babel/preset-env": "^7.7.6",
+    "babel-loader": "^8.0.6",
     "babelify": "^10.0.0",
     "browserify": "^16.5.0",
     "chai": "^4.2.0",

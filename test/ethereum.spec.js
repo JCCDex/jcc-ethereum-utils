@@ -138,12 +138,6 @@ describe('test Ethereum', function() {
       expect(balance).to.equal("1");
     })
 
-    it("return '0' if request failed", async function() {
-      const stub = sandbox.stub(inst._web3.eth, "getBalance");
-      stub.rejects();
-      const balance = await inst.getBalance(config.ETHEREUM_ADDRESS);
-      expect(balance).to.equal("0");
-    })
   })
 
   describe("test getGasPrice", function() {

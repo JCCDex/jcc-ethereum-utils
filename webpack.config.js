@@ -22,7 +22,9 @@ const config = {
       "bn.js": path.resolve(__dirname, "node_modules/bn.js"),
       "base-x": path.resolve(__dirname, "node_modules/base-x"),
       "eth-lib": path.resolve(__dirname, "node_modules/web3-eth-accounts/node_modules/eth-lib"),
-      "underscore": path.resolve(__dirname, "node_modules/web3-eth-accounts/node_modules/underscore")
+      "safe-buffer": path.resolve(__dirname, "node_modules/keccak/node_modules/safe-buffer"),
+      "js-sha3": path.resolve(__dirname, "node_modules/js-sha3"),
+      "inherits": path.resolve(__dirname, "node_modules/keccak/node_modules/inherits")
     }
   },
   mode: process.env.MODE === "dev" ? 'development' : "production",
@@ -35,8 +37,10 @@ const config = {
   module: {
     rules: [{
       test: /\.tsx?$/,
-      use: "ts-loader",
-      exclude: /node_modules/
+      use: "ts-loader"
+    }, {
+      test: /\.js$/,
+      loader: 'babel-loader'
     }]
   },
   plugins: [

@@ -266,13 +266,8 @@ export default class Ethereum {
      * @memberof Ethereum
      */
     public async getBalance(address: string): Promise<string> {
-        let balance: string;
-        try {
-            const wei = await this._web3.eth.getBalance(address);
-            balance = this._web3.utils.fromWei(wei);
-        } catch (error) {
-            balance = "0";
-        }
+        const wei = await this._web3.eth.getBalance(address);
+        const balance = this._web3.utils.fromWei(wei);
         return balance;
     }
 

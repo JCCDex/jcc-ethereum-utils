@@ -104,7 +104,7 @@ try {
    ethereumInstance.initWeb3();
 
    const erc20Instance = new ERC20();
-   erc20Instance.init(jcContract, ethereumInstance);
+   erc20Instance.init(jccContractAddress, ethereumInstance);
 
    const fingateInstance = new Fingate();
    fingateInstance.init(scAddress, ethereumInstance);
