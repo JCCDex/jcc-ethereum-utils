@@ -161,7 +161,7 @@ describe("test Fingate", function() {
       stub2.yields(null, 0);
       const stub3 = sandbox.stub(inst._ethereum.getWeb3().eth, "sendSignedTransaction");
       stub3.yields(null, "1");
-      const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "sendAsync");
+      const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "send");
       stub4.yields(null, 0);
       const hash = await inst.deposit(config.ETHEREUM_SECRET, config.JINGTUM_ADDRESS, "0.001");
       expect(hash).to.equal("1");
@@ -239,7 +239,7 @@ describe("test Fingate", function() {
       stub2.yields(null, 0);
       const stub3 = sandbox.stub(inst._ethereum.getWeb3().eth, "sendSignedTransaction");
       stub3.yields(null, config.MOCK_HASH);
-      const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "sendAsync");
+      const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "send");
       stub4.yields(null, 0);
       const hash = await inst.depositToken(config.JINGTUM_ADDRESS, config.JC_CONTRACT, 18, "0.1", config.MOCK_TRANSFER_HASH, config.ETHEREUM_SECRET);
       expect(hash).to.equal(config.MOCK_HASH);

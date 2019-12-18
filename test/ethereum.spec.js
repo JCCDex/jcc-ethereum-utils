@@ -173,7 +173,7 @@ describe("test Ethereum", function() {
     it("reject error if getTransactionCount failed", async function() {
       const stub = sandbox.stub(inst._web3.eth, "getTransactionCount");
       stub.yields(new Error("getTransactionCount failed"), null);
-      const spy = sandbox.spy(inst._web3.currentProvider, "sendAsync");
+      const spy = sandbox.spy(inst._web3.currentProvider, "send");
       try {
         await inst.getNonce(config.ETHEREUM_ADDRESS);
       } catch (error) {
@@ -183,10 +183,10 @@ describe("test Ethereum", function() {
       }
     });
 
-    it("reject error if sendAsync failed", async function() {
+    it("reject error if send failed", async function() {
       const stub = sandbox.stub(inst._web3.eth, "getTransactionCount");
       stub.yields(null, 0);
-      const s1 = sandbox.stub(inst._web3.currentProvider, "sendAsync");
+      const s1 = sandbox.stub(inst._web3.currentProvider, "send");
       s1.yields(new Error("send failed"), null);
       try {
         await inst.getNonce(config.ETHEREUM_ADDRESS);
@@ -198,7 +198,7 @@ describe("test Ethereum", function() {
     it("resolve 11", async function() {
       const stub = sandbox.stub(inst._web3.eth, "getTransactionCount");
       stub.yields(null, 10);
-      const s1 = sandbox.stub(inst._web3.currentProvider, "sendAsync");
+      const s1 = sandbox.stub(inst._web3.currentProvider, "send");
       s1.yields(null, { result: 11 });
       const nonce = await inst.getNonce("2995c1376a852e4040caf9dbae2c765e24c37a15");
       expect(stub.calledOnceWith(config.ETHEREUM_ADDRESS)).to.true;
@@ -216,7 +216,7 @@ describe("test Ethereum", function() {
     it("resolve 10", async function() {
       const stub = sandbox.stub(inst._web3.eth, "getTransactionCount");
       stub.yields(null, 10);
-      const s1 = sandbox.stub(inst._web3.currentProvider, "sendAsync");
+      const s1 = sandbox.stub(inst._web3.currentProvider, "send");
       s1.yields(null, { result: 9 });
       const nonce = await inst.getNonce("2995c1376a852e4040caf9dbae2c765e24c37a15");
       expect(stub.calledOnceWith(config.ETHEREUM_ADDRESS)).to.true;
@@ -234,7 +234,7 @@ describe("test Ethereum", function() {
 
   describe("test signTransaction", function() {
     it("return correct result", function() {
-      const inst = new Ethereum(config.MOCK_NODE, true);
+      let inst = new Ethereum(config.MOCK_NODE, true);
       inst.initWeb3();
       const to = "0x3907acb4c1818adf72d965c08e0a79af16e7ffb8";
       const value = inst._web3.utils.numberToHex(inst._web3.utils.toWei("0.001", "ether"));
@@ -250,6 +250,17 @@ describe("test Ethereum", function() {
       });
       const sign = inst.signTransaction(tx, config.ETHEREUM_SECRET);
       expect(sign).to.equal(config.MOCK_SIGN);
+      inst = new Ethereum(config.MOCK_NODE, false);
+      inst.initWeb3();
+      expect(inst.getTx(to, 0, 150000, "20000000000", value, config.CALLDATA)).to.deep.equal({
+        chainId: 3,
+        data: config.CALLDATA,
+        nonce: 0,
+        gasPrice: "0x4a817c800",
+        gasLimit: "0x249f0",
+        to,
+        value: "0x38d7ea4c68000"
+      });
     });
   });
 
@@ -305,7 +316,7 @@ describe("test Ethereum", function() {
       sandbox.restore();
     });
     it("resolve true if has pending transaction", async function() {
-      const s1 = sandbox.stub(inst._web3.currentProvider, "sendAsync");
+      const s1 = sandbox.stub(inst._web3.currentProvider, "send");
       s1.yields(null, {
         result: [
           {
@@ -318,7 +329,7 @@ describe("test Ethereum", function() {
     });
 
     it("resolve false if has't pending transaction", async function() {
-      const stub = sandbox.stub(inst._web3.currentProvider, "sendAsync");
+      const stub = sandbox.stub(inst._web3.currentProvider, "send");
       stub.yields(null, {
         result: [
           {
@@ -339,7 +350,7 @@ describe("test Ethereum", function() {
     });
 
     it("reject error", async function() {
-      const stub = sandbox.stub(inst._web3.currentProvider, "sendAsync");
+      const stub = sandbox.stub(inst._web3.currentProvider, "send");
       stub.yields(new Error("failed"), null);
       try {
         await inst.hasPendingTransactions(config.ETHEREUM_ADDRESS.substring(2));

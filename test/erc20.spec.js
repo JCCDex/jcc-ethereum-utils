@@ -129,7 +129,7 @@ describe("test EtherFingate", function() {
       stub2.yields(null, 0);
       const stub3 = sandbox.stub(inst._ethereum.getWeb3().eth, "sendSignedTransaction");
       stub3.yields(null, "1");
-      const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "sendAsync");
+      const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "send");
       stub4.yields(null, 0);
       const hash = await inst.transfer(config.ETHEREUM_SECRET, config.SC_ADDRESS, "1");
       expect(hash).to.equal("1");
