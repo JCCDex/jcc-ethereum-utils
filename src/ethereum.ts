@@ -261,7 +261,7 @@ export default class Ethereum {
    *
    * @param {number|string} block number or string latest
    * @returns {Promise<any>} resolve null if request failed, return block info
-   * @memberof Moac
+   * @memberof Ethereum
    */
   public async getBlock(block: number | string): Promise<any> {
     let blockInfo;
@@ -433,6 +433,41 @@ export default class Ethereum {
           return reject(err);
         }
         return resolve(hash);
+      });
+    });
+  }
+
+  /**
+   * get transaction
+   *
+   * @param {string} hash transaction hash
+   * @returns {any} null or transaction object
+   * @memberof Ethereum
+   */
+  public getTransaction(hash: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this._web3.eth.getTransaction(hash, (err: Error, data: any) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(data);
+      });
+    });
+  }
+  /**
+   * get transaction receipt
+   *
+   * @param {string} hash transaction hash
+   * @returns {any} null or transaction receipt object
+   * @memberof Ethereum
+   */
+  public getTransactionReceipt(hash: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this._web3.eth.getTransactionReceipt(hash, (err: Error, data: any) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(data);
       });
     });
   }

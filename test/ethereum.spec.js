@@ -114,6 +114,66 @@ describe("test Ethereum", function() {
     });
   });
 
+  describe("test get Transaction", function() {
+    let inst;
+    before(() => {
+      inst = new Ethereum(config.MOCK_NODE, true);
+      inst.initWeb3();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it("get transaction successfully", function(done) {
+      let stub = sandbox.stub(inst._web3.eth, "getTransaction");
+      stub.yields(null, config.MOCK_HASH_TRANSACTION);
+      inst.getTransaction(config.MOCK_HASH).then((data) => {
+        expect(data).to.equal(config.MOCK_HASH_TRANSACTION);
+        done();
+      });
+    });
+
+    it("get transaction in error", function(done) {
+      let stub = sandbox.stub(inst._web3.eth, "getTransaction");
+      stub.yields(new Error("connect net in error"), null);
+      inst.getTransaction(config.MOCK_HASH).catch((err) => {
+        expect(err.message).to.equal("connect net in error");
+        done();
+      });
+    });
+  });
+
+  describe("test get Transaction receipt", function() {
+    let inst;
+    before(() => {
+      inst = new Ethereum(config.MOCK_NODE, true);
+      inst.initWeb3();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it("get transaction receipt successfully", function(done) {
+      let stub = sandbox.stub(inst._web3.eth, "getTransactionReceipt");
+      stub.yields(null, config.MOCK_HASH_TRANSACTION_RECEIPT);
+      inst.getTransactionReceipt(config.MOCK_HASH).then((data) => {
+        expect(data).to.equal(config.MOCK_HASH_TRANSACTION_RECEIPT);
+        done();
+      });
+    });
+
+    it("get transaction receipt in error", function(done) {
+      let stub = sandbox.stub(inst._web3.eth, "getTransactionReceipt");
+      stub.yields(new Error("connect net in error"), null);
+      inst.getTransactionReceipt(config.MOCK_HASH).catch((err) => {
+        expect(err.message).to.equal("connect net in error");
+        done();
+      });
+    });
+  });
+
   describe("test getBlock", function() {
     let inst;
     before(() => {
