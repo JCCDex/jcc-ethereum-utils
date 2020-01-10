@@ -114,6 +114,32 @@ describe("test Ethereum", function() {
     });
   });
 
+  describe("test getBlock", function() {
+    let inst;
+    before(() => {
+      inst = new Ethereum(config.MOCK_NODE, true);
+      inst.initWeb3();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it("if request success", async function() {
+      const stub = sandbox.stub(inst._web3.eth, "getBlock");
+      stub.resolves({ hash: "0x123" });
+      const block = await inst.getBlock("latest");
+      expect(block.hash).to.equal("0x123");
+    });
+
+    it("if request fail", async function() {
+      const stub = sandbox.stub(inst._web3.eth, "getBlock");
+      stub.yields(new Error(), null);
+      const block = await inst.getBlock(1);
+      expect(block).to.equal(null);
+    });
+  });
+
   describe("test getBalance", function() {
     let inst;
     before(() => {

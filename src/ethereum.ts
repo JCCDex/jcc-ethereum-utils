@@ -257,6 +257,23 @@ export default class Ethereum {
   }
 
   /**
+   * request info of block
+   *
+   * @param {number|string} block number or string latest
+   * @returns {Promise<any>} resolve null if request failed, return block info
+   * @memberof Moac
+   */
+  public async getBlock(block: number | string): Promise<any> {
+    let blockInfo;
+    try {
+      blockInfo = await this._web3.eth.getBlock(block);
+    } catch (error) {
+      blockInfo = null;
+    }
+    return blockInfo;
+  }
+
+  /**
    * request balance of ether
    *
    * @param {string} address ethereum address
