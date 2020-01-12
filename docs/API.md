@@ -217,6 +217,7 @@ hasPendingTransactions(address: string): Promise<boolean>;
 /**
  * format transaction info
  *
+ * @param {string} from sender address
  * @param {string} to destination address
  * @param {number} nonce nonce
  * @param {number} gasLimit gas limit
@@ -226,7 +227,7 @@ hasPendingTransactions(address: string): Promise<boolean>;
  * @returns {IEthereumTransaction}
  * @memberof Ethereum
  */
-getTx(to: string, nonce: number, gasLimit: number, gasPrice: number, value: string, calldata: string): IEthereumTransaction;
+getTx(from: string, to: string, nonce: number, gasLimit: number, gasPrice: number, value: string, calldata: string): IEthereumTransaction;
 
 /**
  * sign transaction with ethereum secret

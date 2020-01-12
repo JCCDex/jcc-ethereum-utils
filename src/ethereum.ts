@@ -381,6 +381,7 @@ export default class Ethereum {
   /**
    * format transaction info
    *
+   * @param {string} from sender address
    * @param {string} to destination address
    * @param {number} nonce nonce
    * @param {number} gasLimit gas limit
@@ -390,10 +391,11 @@ export default class Ethereum {
    * @returns {IEthereumTransaction}
    * @memberof Ethereum
    */
-  public getTx(to: string, nonce: number, gasLimit: number, gasPrice: number, value: string, calldata: string): IEthereumTransaction {
+  public getTx(from: string, to: string, nonce: number, gasLimit: number, gasPrice: number, value: string, calldata: string): IEthereumTransaction {
     const tx = {
       chainId: this._network,
       data: calldata,
+      from,
       gasLimit: this._web3.utils.toHex(gasLimit),
       gasPrice: this._web3.utils.toHex(gasPrice),
       nonce,
