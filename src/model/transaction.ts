@@ -4,7 +4,7 @@ export interface IEthereumTransaction {
   gasLimit: string;
   from: string;
   to: string;
-  value: string;
+  value: any;
   data: string;
   chainId: number;
 }

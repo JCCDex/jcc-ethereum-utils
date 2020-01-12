@@ -394,13 +394,13 @@ export default class Ethereum {
   public getTx(from: string, to: string, nonce: number, gasLimit: number, gasPrice: number, value: string, calldata: string): IEthereumTransaction {
     const tx = {
       chainId: this._network,
-      data: calldata,
+      data: calldata.length ? calldata : "0x0",
       from,
       gasLimit: this._web3.utils.toHex(gasLimit),
       gasPrice: this._web3.utils.toHex(gasPrice),
       nonce,
       to,
-      value
+      value: this._web3.utils.toHex(this._web3.utils.toWei(value + ""))
     };
     return tx;
   }

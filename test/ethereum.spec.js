@@ -323,8 +323,7 @@ describe("test Ethereum", function() {
       let inst = new Ethereum(config.MOCK_NODE, true);
       inst.initWeb3();
       const to = "0x3907acb4c1818adf72d965c08e0a79af16e7ffb8";
-      const value = inst._web3.utils.numberToHex(inst._web3.utils.toWei("0.001", "ether"));
-      const tx = inst.getTx(config.ETHEREUM_ADDRESS, to, 0, 150000, "20000000000", value, config.CALLDATA);
+      const tx = inst.getTx(config.ETHEREUM_ADDRESS, to, 0, 150000, "20000000000", "0.001", config.CALLDATA);
       expect(tx).to.deep.equal({
         chainId: 1,
         data: config.CALLDATA,
@@ -339,9 +338,9 @@ describe("test Ethereum", function() {
       expect(sign).to.equal(config.MOCK_SIGN);
       inst = new Ethereum(config.MOCK_NODE, false);
       inst.initWeb3();
-      expect(inst.getTx(config.ETHEREUM_ADDRESS, to, 0, 150000, "20000000000", value, config.CALLDATA)).to.deep.equal({
+      expect(inst.getTx(config.ETHEREUM_ADDRESS, to, 0, 150000, "20000000000", "0.001", "")).to.deep.equal({
         chainId: 3,
-        data: config.CALLDATA,
+        data: "0x0",
         nonce: 0,
         gasPrice: "0x4a817c800",
         gasLimit: "0x249f0",

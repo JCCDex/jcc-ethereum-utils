@@ -1,6 +1,6 @@
 {
   "name": "jcc-ethereum-utils",
-  "version": "0.1.8",
+  "version": "0.1.13",
   "description": "Toolkit of crossing chain from Ethereum to SWTC chain",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
