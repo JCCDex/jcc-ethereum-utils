@@ -325,7 +325,7 @@ describe("test Ethereum", function() {
       const to = "0x3907acb4c1818adf72d965c08e0a79af16e7ffb8";
       const tx = inst.getTx(config.ETHEREUM_ADDRESS, to, 0, 150000, "20000000000", "0.001", config.CALLDATA);
       expect(tx).to.deep.equal({
-        chainId: 1,
+        chainId: "0x1",
         data: config.CALLDATA,
         nonce: 0,
         gasPrice: "0x4a817c800",
@@ -339,7 +339,7 @@ describe("test Ethereum", function() {
       inst = new Ethereum(config.MOCK_NODE, false);
       inst.initWeb3();
       expect(inst.getTx(config.ETHEREUM_ADDRESS, to, 0, 150000, "20000000000", "0.001", "")).to.deep.equal({
-        chainId: 3,
+        chainId: "0x3",
         data: "0x0",
         nonce: 0,
         gasPrice: "0x4a817c800",

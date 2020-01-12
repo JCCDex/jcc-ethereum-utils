@@ -6,5 +6,5 @@ export interface IEthereumTransaction {
   to: string;
   value: any;
   data: string;
-  chainId: number;
+  chainId: string;
 }
