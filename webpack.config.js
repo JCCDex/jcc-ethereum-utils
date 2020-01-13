@@ -1,7 +1,7 @@
 const DuplicatePackageCheckerPlugin = require("duplicate-package-checker-webpack-plugin");
 const path = require("path");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 
 const config = {
   entry: "./lib",
@@ -15,57 +15,61 @@ const config = {
   resolve: {
     extensions: [".js", ".ts"],
     alias: {
-      "scryptsy": path.resolve(__dirname, "node_modules/scryptsy"),
+      scryptsy: path.resolve(__dirname, "node_modules/scryptsy"),
       "scrypt.js": path.resolve(__dirname, "node_modules/scrypt.js"),
-      "keccak": path.resolve(__dirname, "node_modules/keccak"),
-      "uuid": path.resolve(__dirname, "node_modules/uuid"),
+      keccak: path.resolve(__dirname, "node_modules/keccak"),
+      uuid: path.resolve(__dirname, "node_modules/uuid"),
       "bn.js": path.resolve(__dirname, "node_modules/bn.js"),
       "base-x": path.resolve(__dirname, "node_modules/base-x"),
       "eth-lib": path.resolve(__dirname, "node_modules/web3-eth-accounts/node_modules/eth-lib"),
       "safe-buffer": path.resolve(__dirname, "node_modules/keccak/node_modules/safe-buffer"),
       "js-sha3": path.resolve(__dirname, "node_modules/js-sha3"),
-      "inherits": path.resolve(__dirname, "node_modules/keccak/node_modules/inherits")
+      inherits: path.resolve(__dirname, "node_modules/keccak/node_modules/inherits"),
+      elliptic: path.resolve(__dirname, "node_modules/secp256k1/node_modules/elliptic")
     }
   },
-  mode: process.env.MODE === "dev" ? 'development' : "production",
+  mode: process.env.MODE === "dev" ? "development" : "production",
   node: {
     fs: "empty",
     tls: "empty",
-    "child_process": "empty",
+    child_process: "empty",
     net: "empty"
   },
   module: {
-    rules: [{
-      test: /\.tsx?$/,
-      use: "ts-loader"
-    }, {
-      test: /\.js$/,
-      loader: 'babel-loader'
-    }]
+    rules: [
+      {
+        test: /\.tsx?$/,
+        use: "ts-loader"
+      },
+      {
+        test: /\.js$/,
+        loader: "babel-loader"
+      }
+    ]
   },
-  plugins: [
-    new DuplicatePackageCheckerPlugin()
-  ]
+  plugins: [new DuplicatePackageCheckerPlugin()]
 };
 
 if (process.env.REPORT === "true") {
-  config.plugins.push(new BundleAnalyzerPlugin())
+  config.plugins.push(new BundleAnalyzerPlugin());
 }
 
 if (process.env.MODE !== "dev") {
-  config.plugins.push(new UglifyJsPlugin({
-    uglifyOptions: {
-      compress: {
-        sequences: true,
-        dead_code: true,
-        drop_console: true,
-        drop_debugger: true,
-        unused: true
-      }
-    },
-    sourceMap: false,
-    parallel: true
-  }));
+  config.plugins.push(
+    new UglifyJsPlugin({
+      uglifyOptions: {
+        compress: {
+          sequences: true,
+          dead_code: true,
+          drop_console: true,
+          drop_debugger: true,
+          unused: true
+        }
+      },
+      sourceMap: false,
+      parallel: true
+    })
+  );
 }
 
 module.exports = config;
