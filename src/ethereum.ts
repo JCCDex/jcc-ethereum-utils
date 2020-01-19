@@ -41,7 +41,7 @@ export default class Ethereum {
    * @type {number}
    * @memberof Ethereum
    */
-  private _network: number;
+  private _network: any;
 
   /**
    * production network
@@ -50,7 +50,7 @@ export default class Ethereum {
    * @type {number}
    * @memberof Ethereum
    */
-  private readonly MAINNET: number = 1;
+  private readonly MAINNET: any = { chain: "mainnet", hardfork: "petersburg" };
 
   /**
    * test network
@@ -59,7 +59,7 @@ export default class Ethereum {
    * @type {number}
    * @memberof Ethereum
    */
-  private readonly TESTNET: number = 3;
+  private readonly TESTNET: any = { chain: "ropsten", hardfork: "petersburg" };
 
   /**
    * gas limit
@@ -393,7 +393,6 @@ export default class Ethereum {
    */
   public getTx(from: string, to: string, nonce: number, gasLimit: number, gasPrice: number, value: string, calldata: string): IEthereumTransaction {
     const tx = {
-      chainId: "0x" + this._network.toString(16),
       data: !calldata ? "0x0" : calldata,
       from,
       gasLimit: this._web3.utils.toHex(gasLimit),

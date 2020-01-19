@@ -468,4 +468,36 @@ describe("test Ethereum", function() {
       ).to.false;
     });
   });
+
+  // describe("test real network", function() {
+  //   let inst;
+  //   before(() => {
+  //     inst = new Ethereum("http://192.168.66.254:8556", false);
+  //     inst.initWeb3();
+  //   });
+
+  //   afterEach(() => {
+  //     sandbox.restore();
+  //   });
+
+  //   it("send transacton", async function() {
+  //     const balance = await inst.getBalance(config.ETHEREUM_ADDRESS1);
+  //     console.log("wallet balance:", balance.toString());
+  //     let nonce = await inst.getNonce(config.ETHEREUM_ADDRESS1);
+  //     let gasPrice = await inst.getGasPrice();
+  //     let tx1 = inst.getTx(config.ETHEREUM_ADDRESS1, "0xa60485fe5f685e2e37236495f36fa4e6f5b1f1f7", nonce, 50000, gasPrice, 1, "");
+  //     let tx = {
+  //       nonce: tx1.nonce,
+  //       gasPrice: tx1.gasPrice,
+  //       gasLimit: tx1.gasLimit,
+  //       to: tx1.to,
+  //       value: tx1.value,
+  //       data: tx1.data
+  //     }
+  //     const sign = inst.signTransaction(tx, config.ETHEREUM_SECRET1);
+  //     console.log(nonce, gasPrice, tx, sign);
+  //     let hash = await inst.sendSignedTransaction(sign);
+  //     console.log("transfer hash:", hash);
+  //   });
+  // });
 });
