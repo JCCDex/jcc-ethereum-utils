@@ -12,9 +12,9 @@ describe("test Ethereum", function() {
     it("create successfully", function() {
       let inst = new Ethereum(config.MOCK_NODE, true);
       expect(inst._node).to.equal(config.MOCK_NODE);
-      expect(inst._network).to.equal(1);
+      expect(inst._network.chain).to.equal("mainnet");
       inst = new Ethereum(config.MOCK_NODE, false);
-      expect(inst._network).to.equal(3);
+      expect(inst._network.chain).to.equal("ropsten");
     });
   });
 
@@ -325,7 +325,6 @@ describe("test Ethereum", function() {
       const to = "0x3907acb4c1818adf72d965c08e0a79af16e7ffb8";
       const tx = inst.getTx(config.ETHEREUM_ADDRESS, to, 0, 150000, "20000000000", "0.001", config.CALLDATA);
       expect(tx).to.deep.equal({
-        chainId: "0x1",
         data: config.CALLDATA,
         nonce: 0,
         gasPrice: "0x4a817c800",
@@ -339,7 +338,6 @@ describe("test Ethereum", function() {
       inst = new Ethereum(config.MOCK_NODE, false);
       inst.initWeb3();
       expect(inst.getTx(config.ETHEREUM_ADDRESS, to, 0, 150000, "20000000000", "0.001", "")).to.deep.equal({
-        chainId: "0x3",
         data: "0x0",
         nonce: 0,
         gasPrice: "0x4a817c800",
@@ -495,9 +493,10 @@ describe("test Ethereum", function() {
   //       data: tx1.data
   //     }
   //     const sign = inst.signTransaction(tx, config.ETHEREUM_SECRET1);
-  //     console.log(nonce, gasPrice, tx, sign);
   //     let hash = await inst.sendSignedTransaction(sign);
   //     console.log("transfer hash:", hash);
+  //     // TODO: 此处异常，需要排查
+  //     // inst.destroyWeb3();
   //   });
   // });
 });

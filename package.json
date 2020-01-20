@@ -1,6 +1,6 @@
 {
   "name": "jcc-ethereum-utils",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Toolkit of crossing chain from Ethereum to SWTC chain",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -38,6 +38,7 @@
     "coveralls": "^3.0.9",
     "cross-env": "^6.0.3",
     "duplicate-package-checker-webpack-plugin": "^3.0.0",
+    "eth-ens-namehash": "^2.0.8",
     "gulp": "^4.0.2",
     "gulp-shell": "^0.7.1",
     "husky": "^4.0.7",

@@ -428,6 +428,8 @@ export default class Ethereum {
    * @memberof Ethereum
    */
   public async sendSignedTransaction(sign: string): Promise<string> {
+    // TODO: https://web3js.readthedocs.io/en/v1.2.4/callbacks-promises-events.html#promievent
+    // sendSignedTransaction会自动绑定receipt等事件，在销毁实例时会抛出错误
     return new Promise((resolve, reject) => {
       this._web3.eth.sendSignedTransaction(sign, (err, hash) => {
         if (err) {
