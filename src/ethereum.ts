@@ -1,6 +1,5 @@
 "use strict";
 import BigNumber from "bignumber.js";
-
 import * as ethWallet from "jcc_wallet/lib/eth";
 import { IWalletModel } from "jcc_wallet/lib/model";
 import { Contract } from "web3-eth-contract";
@@ -41,7 +40,7 @@ export default class Ethereum {
    * @type {number}
    * @memberof Ethereum
    */
-  private _network: any;
+  private _network: { chain: string; hardfork: string };
 
   /**
    * production network
@@ -50,7 +49,7 @@ export default class Ethereum {
    * @type {number}
    * @memberof Ethereum
    */
-  private readonly MAINNET: any = { chain: "mainnet", hardfork: "petersburg" };
+  private readonly MAINNET = { chain: "mainnet", hardfork: "petersburg" };
 
   /**
    * test network
@@ -59,7 +58,7 @@ export default class Ethereum {
    * @type {number}
    * @memberof Ethereum
    */
-  private readonly TESTNET: any = { chain: "ropsten", hardfork: "petersburg" };
+  private readonly TESTNET = { chain: "ropsten", hardfork: "petersburg" };
 
   /**
    * gas limit

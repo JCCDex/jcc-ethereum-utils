@@ -214,4 +214,4 @@ const ensABI = [
   }
 ];
 
-export default ensABI;
+module.exports = ensABI;

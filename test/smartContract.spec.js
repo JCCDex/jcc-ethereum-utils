@@ -1,14 +1,11 @@
 const chai = require("chai");
 const expect = chai.expect;
 const erc20ABI = require("../lib/abi/erc20ABI");
-const ensABI = require("../lib/abi/ensABI");
 const SmartContract = require("../lib").smartContract;
 const Ethereum = require("../lib").Ethereum;
 const sinon = require("sinon");
 const sandbox = sinon.createSandbox();
-const BigNumber = require("bignumber.js");
 const config = require("./config");
-const namehash = require("eth-ens-namehash").hash;
 
 describe("test smartContract", function() {
   describe("test constructor", function() {
@@ -70,31 +67,6 @@ describe("test smartContract", function() {
       inst.destroy();
       expect(inst._contract).to.null;
       expect(ethereum._web3).to.null;
-    });
-  });
-  describe("test real call", function() {
-    it("call function", async function(done) {
-      let ethereum = new Ethereum("http://192.168.66.254:8556", false);
-      ethereum.initWeb3();
-
-      let inst = new SmartContract();
-      inst.init("0x8F12edfdf36658ca69E18F0D65a5A9f6e2f1A583", ethereum, ensABI.default);
-
-      let ret = await inst.callABI("owner", namehash("BTC"));
-      console.log(ret, ethereum._web3.utils.sha3("BTC"), namehash("BTC"));
-
-      calldata = await inst.callABI("setSubnodeOwner", "0x0", ethereum._web3.utils.sha3("BTC"), config.ETHEREUM_ADDRESS1);
-      console.log(calldata);
-
-      let nonce = await ethereum.getNonce(config.ETHEREUM_ADDRESS1);
-
-      let gasPrice = await ethereum.getGasPrice();
-      let tx = ethereum.getTx(config.ETHEREUM_ADDRESS1, "0x8F12edfdf36658ca69E18F0D65a5A9f6e2f1A583", nonce, 50000, gasPrice, "0", calldata);
-      const hash = await ethereum.sendSignedTransaction(ethereum.signTransaction(tx, config.ETHEREUM_SECRET1));
-      console.log("hash:", hash);
-      done();
-      ethereum.destroyWeb3();
-      inst.destroy();
     });
   });
 });
