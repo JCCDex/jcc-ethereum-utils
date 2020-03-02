@@ -1,9 +1,9 @@
 "use strict";
 import BigNumber from "bignumber.js";
 import * as ethWallet from "jcc_wallet/lib/eth";
-import { IWalletModel } from "jcc_wallet/lib/model";
+import { IWalletModel } from "jcc_wallet/lib/types";
 import { Contract } from "web3-eth-contract";
-import { IEthereumTransaction } from "./model/transaction";
+import { IEthereumTransaction } from "./types/transaction";
 const web3 = require("web3");
 const ethereumTx = require("ethereumjs-tx").Transaction;
 const contractClass = require("web3-eth-contract");
