@@ -1,4 +1,4 @@
-export interface IEthereumTransaction {
+declare interface IEthereumTransaction {
   nonce: number;
   gasPrice: string;
   gasLimit: string;
