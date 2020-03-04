@@ -67,11 +67,11 @@ class Fingate extends SmartContract {
   /**
    * check state if pending
    *
-   * @param {(Array<BigNumber | string>)} state
+   * @param {((BigNumber | string)[])} state
    * @returns {boolean} return true if state is pending
    * @memberof Fingate
    */
-  public isPending(state: Array<BigNumber | string>): boolean {
+  public isPending(state: (BigNumber | string)[]): boolean {
     return state[0].toString(10) !== "0" || state[1] !== "";
   }
 
@@ -80,11 +80,11 @@ class Fingate extends SmartContract {
    *
    * @param {string} address ethereum address
    * @param {string} [contractAddress="0x0000000000000000000000000000000000000000"] contract address
-   * @returns {(Promise<Array<BigNumber | string>>)}
+   * @returns {(Promise<(BigNumber | string)[]>)}
    * @memberof Fingate
    */
   @validate
-  public async depositState(@isValidEthereumAddress address: string, @isValidEthereumAddress contractAddress = "0x0000000000000000000000000000000000000000"): Promise<Array<BigNumber | string>> {
+  public async depositState(@isValidEthereumAddress address: string, @isValidEthereumAddress contractAddress = "0x0000000000000000000000000000000000000000"): Promise<(BigNumber | string)[]> {
     address = Ethereum.prefix0x(address);
     const state = await super.callABI("depositState", contractAddress, address);
     return state;

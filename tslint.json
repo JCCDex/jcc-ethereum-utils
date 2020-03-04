@@ -33,6 +33,7 @@
         "constructor": "never"
       }
     ],
-    "no-var-requires": false
+    "no-var-requires": false,
+    "no-reference": false
   }
 }
