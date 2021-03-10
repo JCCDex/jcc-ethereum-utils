@@ -1,6 +1,6 @@
 # jcc-ethereum-utils
 
-Toolkit of crossing chain from Ethereum to SWTC chain
+Toolkit of crossing chain from EVM networks to SWTC chain.
 
 ![npm](https://img.shields.io/npm/v/jcc-ethereum-utils.svg)
 [![Build Status](https://travis-ci.com/JCCDex/jcc-ethereum-utils.svg?branch=master)](https://travis-ci.com/JCCDex/jcc-ethereum-utils)
@@ -17,15 +17,15 @@ e.g. you transfer 1 `eth` to [Ethereum Fingate](https://etherscan.io/address/0x3
 
 ## Support token list of erc20
 
-* [USDT](https://etherscan.io/address/0xdAC17F958D2ee523a2206206994597C13D831ec7)
-* [JCC](https://etherscan.io/address/0x9BD4810a407812042F938d2f69f673843301cfa6)
-* [EKT](https://etherscan.io/address/0xBAb165dF9455AA0F2AeD1f2565520B91DDadB4c8)
-* [DABT](https://etherscan.io/address/0x1C6890825880566dd6Ad88147E0a6acE7930b7c0)
-* [BIZ](https://etherscan.io/address/0x399f9A95305114efAcB91d1d6C02CBe234dD36aF)
-* [SLASH](https://etherscan.io/address/0xE222e2e3517f5AF5e3abc667adF14320C848D6dA)
-* [GSGC](https://etherscan.io/address/0x0ec2a5ec6a976d6d4c101fb647595c9d8d21779e)
+- [USDT](https://etherscan.io/address/0xdAC17F958D2ee523a2206206994597C13D831ec7)
+- [JCC](https://etherscan.io/address/0x9BD4810a407812042F938d2f69f673843301cfa6)
+- [EKT](https://etherscan.io/address/0xBAb165dF9455AA0F2AeD1f2565520B91DDadB4c8)
+- [DABT](https://etherscan.io/address/0x1C6890825880566dd6Ad88147E0a6acE7930b7c0)
+- [BIZ](https://etherscan.io/address/0x399f9A95305114efAcB91d1d6C02CBe234dD36aF)
+- [SLASH](https://etherscan.io/address/0xE222e2e3517f5AF5e3abc667adF14320C848D6dA)
+- [GSGC](https://etherscan.io/address/0x0ec2a5ec6a976d6d4c101fb647595c9d8d21779e)
 
-***If you wanna we support other erc20 token, please contact us.***
+**_If you wanna we support other erc20 token, please contact us._**
 
 ## Installtion
 
@@ -52,85 +52,82 @@ import { Fingate, Ethereum, ERC20 } from "jcc-ethereum-utils";
 // Ethereum node
 const node = "https://eth626892d.jccdex.cn";
 
-// Production network or not
-const production = true;
-
 // Your ethereum secret
-const ethereumSecret = '';
+const ethereumSecret = "";
 
 // Your ethereum address
-const ethereumAddress = '';
+const ethereumAddress = "";
 
 // Your swtc address
-const swtcAddress = '';
+const swtcAddress = "";
 
 // Deposit amount
 const amount = "1";
 
 // Ethereum fingate contract address, don't change it.
-const scAddress = '0x3907acb4c1818adf72d965c08e0a79af16e7ffb8';
+const scAddress = "0x3907acb4c1818adf72d965c08e0a79af16e7ffb8";
 
 try {
-    // deposit 1 ETH
-    const ethereumInstance = new Ethereum(node, true);
-    ethereumInstance.initWeb3();
+  // deposit 1 ETH
+  const ethereumInstance = new Ethereum(node);
+  ethereumInstance.initWeb3();
 
-    const fingateInstance = new Fingate();
-    fingateInstance.init(scAddress, ethereumInstance);
+  const fingateInstance = new Fingate();
+  fingateInstance.init(scAddress, ethereumInstance);
 
-    // Check if has pending order, if has don't call the next deposit api
-    const state = await fingateInstance.depositState(ethereumAddress);
+  // Check if has pending order, if has don't call the next deposit api
+  const state = await fingateInstance.depositState(ethereumAddress);
 
-    if (fingateInstance.isPending(state)) {
-        return;
-    }
+  if (fingateInstance.isPending(state)) {
+    return;
+  }
 
-    // start to transfer 1 ETH to fingate address
-    const hash = await fingateInstance.deposit(ethereumSecret, swtcAddress, amount);
-    console.log(hash);
+  // start to transfer 1 ETH to fingate address
+  const hash = await fingateInstance.deposit(ethereumSecret, swtcAddress, amount);
+  console.log(hash);
 } catch (error) {
-    console.log(error);
+  console.log(error);
 }
 
 // deposit erc20 token
 
 try {
-    // deposit 1 JCC
+  // deposit 1 JCC
 
-    // JCC contract address
-    const jccContractAddress = "0x9BD4810a407812042F938d2f69f673843301cfa6";
+  // JCC contract address
+  const jccContractAddress = "0x9BD4810a407812042F938d2f69f673843301cfa6";
 
-   const ethereumInstance = new Ethereum(node, true);
-   ethereumInstance.initWeb3();
+  const ethereumInstance = new Ethereum(node);
+  ethereumInstance.initWeb3();
 
-   const erc20Instance = new ERC20();
-   erc20Instance.init(jccContractAddress, ethereumInstance);
+  const erc20Instance = new ERC20();
+  erc20Instance.init(jccContractAddress, ethereumInstance);
 
-   const fingateInstance = new Fingate();
-   fingateInstance.init(scAddress, ethereumInstance);
+  const fingateInstance = new Fingate();
+  fingateInstance.init(scAddress, ethereumInstance);
 
-    // Check if has pending order, if has don't call transfer api
-    const state = await fingateInstance.depositState(ethereumAddress, jccContractAddress);
+  // Check if has pending order, if has don't call transfer api
+  const state = await fingateInstance.depositState(ethereumAddress, jccContractAddress);
 
-    if (fingateInstance.isPending(state)) {
-        return;
-    }
+  if (fingateInstance.isPending(state)) {
+    return;
+  }
 
-    const decimals = await erc20Instance.decimals();
+  const decimals = await erc20Instance.decimals();
 
-    // The first step to transfer 1 JCC to fingate address.
-    const transferHash = await erc20Instance.transfer(ethereumSecret, scAddress, amount);
+  // The first step to transfer 1 JCC to fingate address.
+  const transferHash = await erc20Instance.transfer(ethereumSecret, scAddress, amount);
 
-    // The next step to submit previous transfer hash.
-    const depositHash = await fingateInstance.depositToken(swtcAddress, jccContractAddress, decimals, amount, transferHash, ethereumSecret);
-    console.log(depositHash);
+  // The next step to submit previous transfer hash.
+  const depositHash = await fingateInstance.depositToken(swtcAddress, jccContractAddress, decimals, amount, transferHash, ethereumSecret);
+  console.log(depositHash);
 
-    // Warning:
-    // This is not an atomic operating to deposit erc20 tokens for now,
-    // If the first step is successful but next step is failed, please contact us.
-    // The next version will make it an atomic operating after the next version of solidity contract upgrade.
+  // Warning:
+  // This is not an atomic operating to deposit erc20 tokens for now,
+  // If the first step is successful but next step is failed, please contact us.
+  // The next version will make it an atomic operating after the next version of solidity contract upgrade.
 } catch (error) {
-    console.log(error);
+  console.log(error);
 }
 ```
 
