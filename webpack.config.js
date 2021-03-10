@@ -9,7 +9,7 @@ const config = {
     filename: "jcc-ethereum-utils.min.js",
     path: path.resolve(__dirname, "./dist"),
     library: "jcc_ethereum_utils",
-    libraryTarget: "umd",
+    libraryTarget: "umd"
   },
   target: "web",
   resolve: {
@@ -21,32 +21,32 @@ const config = {
       uuid: path.resolve(__dirname, "node_modules/uuid"),
       "bn.js": path.resolve(__dirname, "node_modules/bn.js"),
       "base-x": path.resolve(__dirname, "node_modules/base-x"),
-      "eth-lib": path.resolve(__dirname, "node_modules/web3-eth-accounts/node_modules/eth-lib"),
+      "eth-lib": path.resolve(__dirname, "node_modules/eth-lib"),
       "safe-buffer": path.resolve(__dirname, "node_modules/safe-buffer"),
       "js-sha3": path.resolve(__dirname, "node_modules/js-sha3"),
-      inherits: path.resolve(__dirname, "node_modules/inherits"),
-    },
+      inherits: path.resolve(__dirname, "node_modules/inherits")
+    }
   },
   mode: process.env.MODE === "dev" ? "development" : "production",
   node: {
     fs: "empty",
     tls: "empty",
     child_process: "empty",
-    net: "empty",
+    net: "empty"
   },
   module: {
     rules: [
       {
         test: /\.tsx?$/,
-        use: "ts-loader",
+        use: "ts-loader"
       },
       {
         test: /\.js$/,
-        loader: "babel-loader",
-      },
-    ],
+        loader: "babel-loader"
+      }
+    ]
   },
-  plugins: [new DuplicatePackageCheckerPlugin()],
+  plugins: [new DuplicatePackageCheckerPlugin()]
 };
 
 if (process.env.REPORT === "true") {
@@ -62,11 +62,11 @@ if (process.env.MODE !== "dev") {
           dead_code: true,
           drop_console: true,
           drop_debugger: true,
-          unused: true,
-        },
+          unused: true
+        }
       },
       sourceMap: false,
-      parallel: true,
+      parallel: true
     })
   );
 }
