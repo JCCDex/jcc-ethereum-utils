@@ -148,7 +148,7 @@ describe("test Fingate", function () {
       sandbox.restore();
     });
 
-    it("deposit success", async function () {
+    it("deposit success without nonce", async function () {
       const s1 = sandbox.stub(inst._contract.methods, "deposit");
       s1.returns({
         encodeABI: function () {
@@ -166,6 +166,26 @@ describe("test Fingate", function () {
       const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth.accounts._ethereumCall, "getChainId");
       stub5.resolves(1);
       const hash = await inst.deposit(config.ETHEREUM_SECRET, config.JINGTUM_ADDRESS, "0.001");
+      expect(hash).to.equal("1");
+      expect(stub3.calledOnceWith(config.MOCK_SIGN)).to.true;
+    });
+
+    it("deposit success with nonce", async function () {
+      const s1 = sandbox.stub(inst._contract.methods, "deposit");
+      s1.returns({
+        encodeABI: function () {
+          return "0xa26e1186000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000226a776e714b70584a594a5065416e5564565576334c666278694a68355a5658683739000000000000000000000000000000000000000000000000000000000000";
+        }
+      });
+      const stub1 = sandbox.stub(inst._ethereum.getWeb3().eth, "getGasPrice");
+      stub1.yields(null, "20000000000");
+      const stub3 = sandbox.stub(inst._ethereum.getWeb3().eth, "sendSignedTransaction");
+      stub3.yields(null, "1");
+      const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "send");
+      stub4.yields(null, 0);
+      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth.accounts._ethereumCall, "getChainId");
+      stub5.resolves(1);
+      const hash = await inst.deposit(config.ETHEREUM_SECRET, config.JINGTUM_ADDRESS, "0.001", 0);
       expect(hash).to.equal("1");
       expect(stub3.calledOnceWith(config.MOCK_SIGN)).to.true;
     });
@@ -228,7 +248,7 @@ describe("test Fingate", function () {
       }
     });
 
-    it("depositToken success", async function () {
+    it("depositToken success without nonce", async function () {
       const s1 = sandbox.stub(inst._contract.methods, "deposit");
       s1.returns({
         encodeABI: function () {
@@ -246,6 +266,26 @@ describe("test Fingate", function () {
       const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth.accounts._ethereumCall, "getChainId");
       stub5.resolves(1);
       const hash = await inst.depositToken(config.JINGTUM_ADDRESS, config.JC_CONTRACT, 18, "0.1", config.MOCK_TRANSFER_HASH, config.ETHEREUM_SECRET);
+      expect(hash).to.equal(config.MOCK_HASH);
+      expect(stub3.calledOnceWith(config.MOCK_DEPOSITTOKEN_SIGN)).to.true;
+    });
+
+    it("depositToken success with nonce", async function () {
+      const s1 = sandbox.stub(inst._contract.methods, "deposit");
+      s1.returns({
+        encodeABI: function () {
+          return "0xcc2c516400000000000000000000000000000000000000000000000000000000000000800000000000000000000000009bd4810a407812042f938d2f69f673843301cfa6000000000000000000000000000000000000000000000000016345785d8a00006a7826f215bb65914c7676da64956e9bbf9c45c7c542a65dad80af8ebc355ed700000000000000000000000000000000000000000000000000000000000000226a776e714b70584a594a5065416e5564565576334c666278694a68355a5658683739000000000000000000000000000000000000000000000000000000000000";
+        }
+      });
+      const stub1 = sandbox.stub(inst._ethereum.getWeb3().eth, "getGasPrice");
+      stub1.yields(null, "20000000000");
+      const stub3 = sandbox.stub(inst._ethereum.getWeb3().eth, "sendSignedTransaction");
+      stub3.yields(null, config.MOCK_HASH);
+      const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "send");
+      stub4.yields(null, 0);
+      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth.accounts._ethereumCall, "getChainId");
+      stub5.resolves(1);
+      const hash = await inst.depositToken(config.JINGTUM_ADDRESS, config.JC_CONTRACT, 18, "0.1", config.MOCK_TRANSFER_HASH, config.ETHEREUM_SECRET, 0);
       expect(hash).to.equal(config.MOCK_HASH);
       expect(stub3.calledOnceWith(config.MOCK_DEPOSITTOKEN_SIGN)).to.true;
     });

@@ -303,6 +303,7 @@ export default class Ethereum {
             if (error) {
               return reject(error);
             }
+
             const count = new BigNumber(response.result).toNumber();
             const nonce = count > ethCount ? count : ethCount;
             return resolve(nonce);

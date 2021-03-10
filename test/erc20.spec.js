@@ -106,7 +106,7 @@ describe("test EtherFingate", function () {
       }
     });
 
-    it("transfer success", async function () {
+    it("transfer success without nonce", async function () {
       const s2 = sandbox.stub(inst._contract.methods, "decimals");
       s2.returns({
         call: function () {
@@ -134,6 +134,36 @@ describe("test EtherFingate", function () {
       const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth.accounts._ethereumCall, "getChainId");
       stub5.resolves(1);
       const hash = await inst.transfer(config.ETHEREUM_SECRET, config.SC_ADDRESS, "1");
+      expect(hash).to.equal("1");
+      expect(stub3.calledOnceWith(config.MOCK_TRANSFER_SIGN)).to.true;
+    });
+
+    it("transfer success with nonce", async function () {
+      const s2 = sandbox.stub(inst._contract.methods, "decimals");
+      s2.returns({
+        call: function () {
+          return new Promise((resolve, reject) => {
+            resolve("18");
+          });
+        }
+      });
+      const s3 = sandbox.stub(s2, "call");
+      s3.resolves();
+      const s1 = sandbox.stub(inst._contract.methods, "transfer");
+      s1.returns({
+        encodeABI: function () {
+          return "0xa9059cbb0000000000000000000000003907acb4c1818adf72d965c08e0a79af16e7ffb8000000000000000000000000000000000000000000000000016345785d8a0000";
+        }
+      });
+      const stub1 = sandbox.stub(inst._ethereum.getWeb3().eth, "getGasPrice");
+      stub1.yields(null, "20000000000");
+      const stub3 = sandbox.stub(inst._ethereum.getWeb3().eth, "sendSignedTransaction");
+      stub3.yields(null, "1");
+      const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "send");
+      stub4.yields(null, 0);
+      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth.accounts._ethereumCall, "getChainId");
+      stub5.resolves(1);
+      const hash = await inst.transfer(config.ETHEREUM_SECRET, config.SC_ADDRESS, "1", 0);
       expect(hash).to.equal("1");
       expect(stub3.calledOnceWith(config.MOCK_TRANSFER_SIGN)).to.true;
     });
