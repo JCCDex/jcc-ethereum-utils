@@ -7,9 +7,9 @@ const sandbox = sinon.createSandbox();
 const config = require("./config");
 const Contract = require("web3-eth-contract");
 
-describe("test Fingate", function() {
-  describe("test constructor", function() {
-    it("create successfully", function() {
+describe("test Fingate", function () {
+  describe("test constructor", function () {
+    it("create successfully", function () {
       let inst = new Fingate();
       const ethereum = new Ethereum(config.MOCK_NODE, true);
       ethereum.initWeb3();
@@ -28,8 +28,8 @@ describe("test Fingate", function() {
     });
   });
 
-  describe("test destroy", function() {
-    it("destroy and destroyWeb3 should be called once", function() {
+  describe("test destroy", function () {
+    it("destroy and destroyWeb3 should be called once", function () {
       let inst = new Fingate();
       const ethereum = new Ethereum(config.MOCK_NODE, true);
       ethereum.initWeb3();
@@ -39,7 +39,7 @@ describe("test Fingate", function() {
     });
   });
 
-  describe("test depositState", async function() {
+  describe("test depositState", async function () {
     let inst;
     before(() => {
       inst = new Fingate();
@@ -52,10 +52,10 @@ describe("test Fingate", function() {
       sandbox.restore();
     });
 
-    it("request success", async function() {
+    it("request success", async function () {
       const s1 = sandbox.stub(inst._contract.methods, "depositState");
       s1.returns({
-        call: function() {
+        call: function () {
           return new Promise((resolve, reject) => {
             resolve({
               "0": "0",
@@ -82,10 +82,10 @@ describe("test Fingate", function() {
       expect(s1.calledOnceWith("0x0000000000000000000000000000000000000000", config.ETHEREUM_ADDRESS)).to.true;
     });
 
-    it("request failed", async function() {
+    it("request failed", async function () {
       const s1 = sandbox.stub(inst._contract.methods, "depositState");
       s1.returns({
-        call: function() {
+        call: function () {
           return new Promise((resolve, reject) => {
             reject(new Error("network error"));
           });
@@ -101,8 +101,8 @@ describe("test Fingate", function() {
     });
   });
 
-  describe("test isPending", function() {
-    it("return false if not pending", function() {
+  describe("test isPending", function () {
+    it("return false if not pending", function () {
       const inst = new Fingate();
       const ethereum = new Ethereum(config.MOCK_NODE, true);
       ethereum.initWeb3();
@@ -118,7 +118,7 @@ describe("test Fingate", function() {
       expect(inst.isPending(state)).to.false;
     });
 
-    it("return true if pending", function() {
+    it("return true if pending", function () {
       const inst = new Fingate();
       const ethereum = new Ethereum(config.MOCK_NODE, true);
       ethereum.initWeb3();
@@ -135,9 +135,9 @@ describe("test Fingate", function() {
     });
   });
 
-  describe("test deposit", function() {
+  describe("test deposit", function () {
     let inst;
-    before(function() {
+    before(function () {
       inst = new Fingate();
       const ethereum = new Ethereum(config.MOCK_NODE, true);
       ethereum.initWeb3();
@@ -148,10 +148,10 @@ describe("test Fingate", function() {
       sandbox.restore();
     });
 
-    it("deposit success", async function() {
+    it("deposit success", async function () {
       const s1 = sandbox.stub(inst._contract.methods, "deposit");
       s1.returns({
-        encodeABI: function() {
+        encodeABI: function () {
           return "0xa26e1186000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000226a776e714b70584a594a5065416e5564565576334c666278694a68355a5658683739000000000000000000000000000000000000000000000000000000000000";
         }
       });
@@ -163,12 +163,14 @@ describe("test Fingate", function() {
       stub3.yields(null, "1");
       const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "send");
       stub4.yields(null, 0);
+      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth.accounts._ethereumCall, "getChainId");
+      stub5.resolves(1);
       const hash = await inst.deposit(config.ETHEREUM_SECRET, config.JINGTUM_ADDRESS, "0.001");
       expect(hash).to.equal("1");
       expect(stub3.calledOnceWith(config.MOCK_SIGN)).to.true;
     });
 
-    it("jingtum address is invalid", function() {
+    it("jingtum address is invalid", function () {
       expect(() => inst.deposit(config.ETHEREUM_SECRET, config.JINGTUM_ADDRESS.substring(1), 1)).throw(`${config.JINGTUM_ADDRESS.substring(1)} is invalid jingtum address.`);
     });
 
@@ -176,11 +178,11 @@ describe("test Fingate", function() {
       expect(() => inst.deposit(config.ETHEREUM_SECRET, config.JINGTUM_ADDRESS, 0)).throw(`0 is invalid amount.`);
     });
 
-    it("moac secret is invalid", function() {
+    it("moac secret is invalid", function () {
       expect(() => inst.deposit(config.ETHEREUM_SECRET.substring(1), config.JINGTUM_ADDRESS, 1)).throw(`${config.ETHEREUM_SECRET.substring(1)} is invalid ethereum secret.`);
     });
 
-    it("reject error", async function() {
+    it("reject error", async function () {
       try {
         await inst.deposit(config.ETHEREUM_SECRET, config.JINGTUM_ADDRESS, 0.001);
       } catch (error) {
@@ -189,9 +191,9 @@ describe("test Fingate", function() {
     });
   });
 
-  describe("test depositToken", function() {
+  describe("test depositToken", function () {
     let inst;
-    before(function() {
+    before(function () {
       inst = new Fingate();
       const ethereum = new Ethereum(config.MOCK_NODE, true);
       ethereum.initWeb3();
@@ -206,19 +208,19 @@ describe("test Fingate", function() {
       expect(() => inst.depositToken(config.JINGTUM_ADDRESS, config.JC_CONTRACT, 18, "0", config.MOCK_HASH, config.ETHEREUM_SECRET)).throw(`0 is invalid amount.`);
     });
 
-    it("moac secret is invalid", function() {
+    it("moac secret is invalid", function () {
       expect(() => inst.depositToken(config.JINGTUM_ADDRESS, config.JC_CONTRACT, 18, 1, config.MOCK_HASH, config.ETHEREUM_SECRET.substring(1))).throw(`${config.ETHEREUM_SECRET.substring(1)} is invalid ethereum secret.`);
     });
 
-    it("hash is invalid", function() {
+    it("hash is invalid", function () {
       expect(() => inst.depositToken(config.JINGTUM_ADDRESS, config.JC_CONTRACT, 18, 1, config.MOCK_HASH.substring(1), config.ETHEREUM_SECRET)).throw(`${config.MOCK_HASH.substring(1)} is invalid hash.`);
     });
 
-    it("contract address is invalid", function() {
+    it("contract address is invalid", function () {
       expect(() => inst.depositToken(config.JINGTUM_ADDRESS, config.JC_CONTRACT.substring(1), 18, 1, config.MOCK_HASH.substring(1), config.ETHEREUM_SECRET)).throw(`${config.JC_CONTRACT.substring(1)} is invalid ethereum address.`);
     });
 
-    it("reject error", async function() {
+    it("reject error", async function () {
       try {
         await inst.depositToken(config.JINGTUM_ADDRESS, config.JC_CONTRACT, 18, 1, config.MOCK_HASH, config.ETHEREUM_SECRET);
       } catch (error) {
@@ -226,10 +228,10 @@ describe("test Fingate", function() {
       }
     });
 
-    it("depositToken success", async function() {
+    it("depositToken success", async function () {
       const s1 = sandbox.stub(inst._contract.methods, "deposit");
       s1.returns({
-        encodeABI: function() {
+        encodeABI: function () {
           return "0xcc2c516400000000000000000000000000000000000000000000000000000000000000800000000000000000000000009bd4810a407812042f938d2f69f673843301cfa6000000000000000000000000000000000000000000000000016345785d8a00006a7826f215bb65914c7676da64956e9bbf9c45c7c542a65dad80af8ebc355ed700000000000000000000000000000000000000000000000000000000000000226a776e714b70584a594a5065416e5564565576334c666278694a68355a5658683739000000000000000000000000000000000000000000000000000000000000";
         }
       });
@@ -241,6 +243,8 @@ describe("test Fingate", function() {
       stub3.yields(null, config.MOCK_HASH);
       const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "send");
       stub4.yields(null, 0);
+      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth.accounts._ethereumCall, "getChainId");
+      stub5.resolves(1);
       const hash = await inst.depositToken(config.JINGTUM_ADDRESS, config.JC_CONTRACT, 18, "0.1", config.MOCK_TRANSFER_HASH, config.ETHEREUM_SECRET);
       expect(hash).to.equal(config.MOCK_HASH);
       expect(stub3.calledOnceWith(config.MOCK_DEPOSITTOKEN_SIGN)).to.true;

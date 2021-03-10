@@ -1,7 +1,7 @@
 declare interface IEthereumTransaction {
   nonce: number;
   gasPrice: string;
-  gasLimit: string;
+  gas: string;
   from: string;
   to: string;
   value: any;

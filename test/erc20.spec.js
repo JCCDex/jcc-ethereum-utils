@@ -7,9 +7,9 @@ const sandbox = sinon.createSandbox();
 const config = require("./config");
 const Contract = require("web3-eth-contract");
 
-describe("test EtherFingate", function() {
-  describe("test constructor", function() {
-    it("create successfully", function() {
+describe("test EtherFingate", function () {
+  describe("test constructor", function () {
+    it("create successfully", function () {
       let inst = new ERC20();
       const ethereum = new Ethereum(config.MOCK_NODE, true);
       ethereum.initWeb3();
@@ -25,7 +25,7 @@ describe("test EtherFingate", function() {
     });
   });
 
-  it("destroy and destroyWeb3 should be called once", function() {
+  it("destroy and destroyWeb3 should be called once", function () {
     let inst = new ERC20();
     const ethereum = new Ethereum(config.MOCK_NODE, true);
     ethereum.initWeb3();
@@ -34,7 +34,7 @@ describe("test EtherFingate", function() {
     expect(inst._contract).to.equal(null);
   });
 
-  describe("test balanceOf", function() {
+  describe("test balanceOf", function () {
     let inst;
     before(() => {
       inst = new ERC20();
@@ -47,10 +47,10 @@ describe("test EtherFingate", function() {
       sandbox.restore();
     });
 
-    it("return 1 if resolve 1000000000000000000", async function() {
+    it("return 1 if resolve 1000000000000000000", async function () {
       const s1 = sandbox.stub(inst._contract.methods, "balanceOf");
       s1.returns({
-        call: function() {
+        call: function () {
           return new Promise((resolve, reject) => {
             resolve("1000000000000000000");
           });
@@ -60,7 +60,7 @@ describe("test EtherFingate", function() {
       s2.resolves();
       const s3 = sandbox.stub(inst._contract.methods, "decimals");
       s3.returns({
-        call: function() {
+        call: function () {
           return new Promise((resolve, reject) => {
             resolve("18");
           });
@@ -73,9 +73,9 @@ describe("test EtherFingate", function() {
     });
   });
 
-  describe("test transfer", function() {
+  describe("test transfer", function () {
     let inst;
-    before(function() {
+    before(function () {
       inst = new ERC20();
       const ethereum = new Ethereum(config.MOCK_NODE, true);
       ethereum.initWeb3();
@@ -90,15 +90,15 @@ describe("test EtherFingate", function() {
       expect(() => inst.transfer(config.ETHEREUM_SECRET, config.SC_ADDRESS, "-1")).throw(`-1 is invalid amount.`);
     });
 
-    it("moac secret is invalid", function() {
+    it("moac secret is invalid", function () {
       expect(() => inst.transfer(config.ETHEREUM_SECRET.substring(1), config.SC_ADDRESS, 1)).throw(`${config.ETHEREUM_SECRET.substring(1)} is invalid ethereum secret.`);
     });
 
-    it("destination address is invalid", function() {
+    it("destination address is invalid", function () {
       expect(() => inst.transfer(config.ETHEREUM_SECRET, config.SC_ADDRESS.substring(1), 1)).throw(`${config.SC_ADDRESS.substring(1)} is invalid ethereum address.`);
     });
 
-    it("reject error", async function() {
+    it("reject error", async function () {
       try {
         await inst.transfer(config.ETHEREUM_SECRET, config.JC_CONTRACT, 1);
       } catch (error) {
@@ -106,10 +106,10 @@ describe("test EtherFingate", function() {
       }
     });
 
-    it("transfer success", async function() {
+    it("transfer success", async function () {
       const s2 = sandbox.stub(inst._contract.methods, "decimals");
       s2.returns({
-        call: function() {
+        call: function () {
           return new Promise((resolve, reject) => {
             resolve("18");
           });
@@ -119,7 +119,7 @@ describe("test EtherFingate", function() {
       s3.resolves();
       const s1 = sandbox.stub(inst._contract.methods, "transfer");
       s1.returns({
-        encodeABI: function() {
+        encodeABI: function () {
           return "0xa9059cbb0000000000000000000000003907acb4c1818adf72d965c08e0a79af16e7ffb8000000000000000000000000000000000000000000000000016345785d8a0000";
         }
       });
@@ -131,6 +131,8 @@ describe("test EtherFingate", function() {
       stub3.yields(null, "1");
       const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "send");
       stub4.yields(null, 0);
+      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth.accounts._ethereumCall, "getChainId");
+      stub5.resolves(1);
       const hash = await inst.transfer(config.ETHEREUM_SECRET, config.SC_ADDRESS, "1");
       expect(hash).to.equal("1");
       expect(stub3.calledOnceWith(config.MOCK_TRANSFER_SIGN)).to.true;

@@ -106,7 +106,7 @@ class Fingate extends SmartContract {
     const gasPrice = await this.ethereum.getGasPrice();
     const nonce = await this.ethereum.getNonce(address);
     const tx = this.ethereum.getTx(address, this.contractAddress, nonce, this.etherGasLimit, gasPrice, amount, calldata);
-    const sign = this.ethereum.signTransaction(tx, secret);
+    const sign = await this.ethereum.signTransaction(tx, secret);
     const hash = await this.ethereum.sendSignedTransaction(sign);
     return hash;
   }
@@ -131,7 +131,7 @@ class Fingate extends SmartContract {
     const gasPrice = await this.ethereum.getGasPrice();
     const calldata = await super.callABI("depositToken", jtAddress, tokenAddress, value, hash);
     const tx = this.ethereum.getTx(address, this.contractAddress, nonce, 450000, gasPrice, "0", calldata);
-    const sign = this.ethereum.signTransaction(tx, secret);
+    const sign = await this.ethereum.signTransaction(tx, secret);
     const txHash = await this.ethereum.sendSignedTransaction(sign);
     return txHash;
   }

@@ -82,7 +82,7 @@ class ERC20 extends SmartContract {
     const nonce = await this.ethereum.getNonce(sender);
     const calldata = await super.callABI("transfer", to, value);
     const tx = this.ethereum.getTx(sender, this.contractAddress, nonce, 90000, gasPrice, "0", calldata);
-    const sign = this.ethereum.signTransaction(tx, secret);
+    const sign = await this.ethereum.signTransaction(tx, secret);
     const hash = await this.ethereum.sendSignedTransaction(sign);
     return hash;
   }

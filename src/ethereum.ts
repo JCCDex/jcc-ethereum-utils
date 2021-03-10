@@ -6,7 +6,6 @@ import * as ethWallet from "jcc_wallet/lib/eth";
 import { IWalletModel } from "jcc_wallet/lib/types";
 import { Contract } from "web3-eth-contract";
 const web3 = require("web3");
-const ethereumTx = require("ethereumjs-tx").Transaction;
 const contractClass = require("web3-eth-contract");
 
 /**
@@ -33,33 +32,6 @@ export default class Ethereum {
    * @memberof Ethereum
    */
   private _node: string;
-
-  /**
-   * ethereum network
-   *
-   * @private
-   * @type {number}
-   * @memberof Ethereum
-   */
-  private _network: { chain: string; hardfork: string };
-
-  /**
-   * production network
-   *
-   * @private
-   * @type {number}
-   * @memberof Ethereum
-   */
-  private readonly MAINNET = { chain: "mainnet", hardfork: "petersburg" };
-
-  /**
-   * test network
-   *
-   * @private
-   * @type {number}
-   * @memberof Ethereum
-   */
-  private readonly TESTNET = { chain: "ropsten", hardfork: "petersburg" };
 
   /**
    * gas limit
@@ -91,13 +63,11 @@ export default class Ethereum {
   /**
    * Creates an instance of Ethereum
    * @param {string} node http node
-   * @param {boolean} mainnet production or test network
    * @memberof Ethereum
    */
-  constructor(node: string, mainnet: boolean) {
+  constructor(node: string) {
     this._web3 = null;
     this._node = node;
-    this._network = mainnet ? this.MAINNET : this.TESTNET;
     this._gasLimit = 200000;
     this._minGasPrice = 5 * 10 ** 9;
     this._defaultGasPrice = 10 ** 10;
@@ -395,7 +365,7 @@ export default class Ethereum {
     const tx = {
       data: !calldata ? "0x0" : calldata,
       from,
-      gasLimit: this._web3.utils.toHex(gasLimit),
+      gas: this._web3.utils.toHex(gasLimit),
       gasPrice: this._web3.utils.toHex(gasPrice),
       nonce,
       to,
@@ -409,15 +379,12 @@ export default class Ethereum {
    *
    * @param {IEthereumTransaction} tx transaction
    * @param {string} secret ethereum secret
-   * @returns {string} return signed info
+   * @returns {Promise<string>} return signed info
    * @memberof Ethereum
    */
-  public signTransaction(tx: IEthereumTransaction, secret: string): string {
-    const transaction = new ethereumTx(tx, this._network);
-    const privateKey = Buffer.from(Ethereum.filter0x(secret), "hex");
-    transaction.sign(privateKey);
-    const serializedTx = transaction.serialize();
-    return "0x" + serializedTx.toString("hex");
+  public async signTransaction(tx: IEthereumTransaction, secret: string): Promise<string> {
+    const signed = await this._web3.eth.accounts.signTransaction(tx, secret);
+    return signed.rawTransaction;
   }
 
   /**
