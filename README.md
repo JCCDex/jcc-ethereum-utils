@@ -106,26 +106,19 @@ try {
   const fingateInstance = new Fingate();
   fingateInstance.init(scAddress, ethereumInstance);
 
-  // Check if has pending order, if has don't call transfer api
-  const state = await fingateInstance.depositState(ethereumAddress, jccContractAddress);
+  fingateInstance.initErc20(erc20Instance);
+
+  // Check if has pending order, if has don't call depositErc20 api
+  const state = await fingateInstance.depositState(address, jccContractAddress);
 
   if (fingateInstance.isPending(state)) {
     return;
   }
 
-  const decimals = await erc20Instance.decimals();
+  const amount = "1";
 
-  // The first step to transfer 1 JCC to fingate address.
-  const transferHash = await erc20Instance.transfer(ethereumSecret, scAddress, amount);
-
-  // The next step to submit previous transfer hash.
-  const depositHash = await fingateInstance.depositToken(swtcAddress, jccContractAddress, decimals, amount, transferHash, ethereumSecret);
-  console.log(depositHash);
-
-  // Warning:
-  // This is not an atomic operating to deposit erc20 tokens for now,
-  // If the first step is successful but next step is failed, please contact us.
-  // The next version will make it an atomic operating after the next version of solidity contract upgrade.
+  const receipts = await fingateInstance.depositErc20(ethereumSecret, amount, swtcAddress);
+  console.log(receipts);
 } catch (error) {
   console.log(error);
 }

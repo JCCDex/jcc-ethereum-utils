@@ -1,5 +1,7 @@
 import BigNumber from "bignumber.js";
 import fingateABI from "./abi/fingateABI";
+import PromisifyBatchRequest from "./promisifyBatchRequest";
+import ERC20 from "./erc20";
 import Ethereum from "./ethereum";
 import SmartContract from "./smartContract";
 import { isValidAmount, isValidEthereumAddress, isValidEthereumSecret, isValidHash, isValidJingtumAddress, validate } from "./validator";
@@ -20,6 +22,8 @@ class Fingate extends SmartContract {
    * @memberof Fingate
    */
   private _etherGasLimit: number;
+
+  private _erc20: ERC20;
 
   /**
    * Creates an instance of ERC20
@@ -53,6 +57,10 @@ class Fingate extends SmartContract {
   @validate
   public init(@isValidEthereumAddress fingateAddress: string, ethereum: Ethereum) {
     super.init(fingateAddress, ethereum, fingateABI);
+  }
+
+  public initErc20(erc20: ERC20) {
+    this._erc20 = erc20;
   }
 
   /**
@@ -136,6 +144,29 @@ class Fingate extends SmartContract {
     const sign = await this.ethereum.signTransaction(tx, secret);
     const txHash = await this.ethereum.sendSignedTransaction(sign);
     return txHash;
+  }
+
+  public async depositErc20(secret: string, amount: string, jtAddress: string) {
+    const decimals = await this._erc20.decimals();
+    const web3 = this.ethereum.getWeb3();
+    const sender = Ethereum.getAddress(secret);
+    const value = web3.utils.toHex(new BigNumber(amount).multipliedBy(10 ** decimals).toString(10));
+    const gasPrice = await this.ethereum.getGasPrice();
+    const nonce = await this.ethereum.getNonce(sender);
+    const calldata = await this._erc20.callABI("transfer", this.contractAddress, value);
+    const tx = this.ethereum.getTx(sender, this._erc20.contractAddress, nonce, 90000, gasPrice, "0", calldata);
+    const sign = await this.ethereum.signTransaction(tx, secret);
+    const hash = web3.utils.sha3(sign);
+
+    const calldata1 = await super.callABI("depositToken", jtAddress, this._erc20.contractAddress, value, hash);
+    const tx1 = this.ethereum.getTx(sender, this.contractAddress, nonce + 1, 450000, gasPrice, "0", calldata1);
+    const sign1 = await this.ethereum.signTransaction(tx1, secret);
+
+    const batch = new PromisifyBatchRequest(web3.BatchRequest);
+    batch.add(web3.eth.sendSignedTransaction.request, sign);
+    batch.add(web3.eth.sendSignedTransaction.request, sign1);
+    const receipts = await batch.execute();
+    return receipts;
   }
 }
 
