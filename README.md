@@ -117,7 +117,7 @@ try {
 
   const amount = "1";
 
-  const receipts = await fingateInstance.depositErc20(ethereumSecret, amount, swtcAddress);
+  const receipts = await fingateInstance.depositErc20(ethereumSecret, swtcAddress, amount);
   console.log(receipts);
 } catch (error) {
   console.log(error);

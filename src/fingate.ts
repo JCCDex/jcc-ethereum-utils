@@ -146,13 +146,24 @@ class Fingate extends SmartContract {
     return txHash;
   }
 
-  public async depositErc20(secret: string, amount: string, jtAddress: string) {
+  /**
+   * deposit erc20
+   *
+   * @param {string} secret ethereum secret
+   * @param {string} jtAddress jingtum address
+   * @param {string} amount deposit value
+   * @param {string} [nonce] nonce
+   * @returns {Promise<string[]>} resolve hashs if success
+   * @memberof Fingate
+   */
+  @validate
+  public async depositErc20(@isValidEthereumSecret secret: string, @isValidJingtumAddress jtAddress: string, @isValidAmount amount: string, nonce?: number): Promise<string[]> {
     const decimals = await this._erc20.decimals();
     const web3 = this.ethereum.getWeb3();
     const sender = Ethereum.getAddress(secret);
     const value = web3.utils.toHex(new BigNumber(amount).multipliedBy(10 ** decimals).toString(10));
     const gasPrice = await this.ethereum.getGasPrice();
-    const nonce = await this.ethereum.getNonce(sender);
+    nonce = new BigNumber(nonce).isInteger() ? nonce : await this.ethereum.getNonce(sender);
     const calldata = await this._erc20.callABI("transfer", this.contractAddress, value);
     const tx = this.ethereum.getTx(sender, this._erc20.contractAddress, nonce, 90000, gasPrice, "0", calldata);
     const sign = await this.ethereum.signTransaction(tx, secret);
