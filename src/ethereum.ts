@@ -370,7 +370,7 @@ export default class Ethereum {
       gasPrice: this._web3.utils.toHex(gasPrice),
       nonce,
       to,
-      value: this._web3.utils.toHex(this._web3.utils.toWei(value + ""))
+      value: value?.startsWith("0x") ? value : this._web3.utils.toHex(this._web3.utils.toWei(value + ""))
     };
     return tx;
   }
