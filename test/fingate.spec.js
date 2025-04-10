@@ -5,7 +5,7 @@ const Ethereum = require("../lib").Ethereum;
 const sinon = require("sinon");
 const sandbox = sinon.createSandbox();
 const config = require("./config");
-const Contract = require("web3-eth-contract");
+const { Contract } = require("web3-eth-contract");
 
 describe("test Fingate", function () {
   describe("test constructor", function () {
@@ -58,9 +58,9 @@ describe("test Fingate", function () {
         call: function () {
           return new Promise((resolve, reject) => {
             resolve({
-              "0": "0",
-              "1": "",
-              "2": "0",
+              0: "0",
+              1: "",
+              2: "0",
               amount: "0",
               jtaddress: "",
               state: "0"
@@ -72,9 +72,9 @@ describe("test Fingate", function () {
       s2.resolves();
       const state = await inst.depositState(config.ETHEREUM_ADDRESS);
       expect(state).to.deep.equal({
-        "0": "0",
-        "1": "",
-        "2": "0",
+        0: "0",
+        1: "",
+        2: "0",
         amount: "0",
         jtaddress: "",
         state: "0"
@@ -108,9 +108,9 @@ describe("test Fingate", function () {
       ethereum.initWeb3();
       inst.init(config.ETHEREUM_ADDRESS, ethereum);
       const state = {
-        "0": "0",
-        "1": "",
-        "2": "0",
+        0: "0",
+        1: "",
+        2: "0",
         amount: "0",
         jtaddress: "",
         state: "0"
@@ -124,9 +124,9 @@ describe("test Fingate", function () {
       ethereum.initWeb3();
       inst.init(config.ETHEREUM_ADDRESS, ethereum);
       const state = {
-        "0": "1000000000000000",
-        "1": "jwnqKpXJYJPeAnUdVUv3LfbxiJh5ZVXh79",
-        "2": "0",
+        0: "1000000000000000",
+        1: "jwnqKpXJYJPeAnUdVUv3LfbxiJh5ZVXh79",
+        2: "0",
         amount: "1000000000000000",
         jtaddress: "jwnqKpXJYJPeAnUdVUv3LfbxiJh5ZVXh79",
         state: "0"
@@ -156,15 +156,26 @@ describe("test Fingate", function () {
         }
       });
       const stub1 = sandbox.stub(inst._ethereum.getWeb3().eth, "getGasPrice");
-      stub1.yields(null, "20000000000");
+      stub1.resolves("20000000000");
       const stub2 = sandbox.stub(inst._ethereum.getWeb3().eth, "getTransactionCount");
-      stub2.yields(null, 0);
+      stub2.resolves(0);
       const stub3 = sandbox.stub(inst._ethereum.getWeb3().eth, "sendSignedTransaction");
-      stub3.yields(null, "1");
+      stub3.resolves({ transactionHash: "1" });
       const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "send");
       stub4.yields(null, 0);
-      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth.accounts._ethereumCall, "getChainId");
+      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth, "getChainId");
       stub5.resolves(1);
+      const stub6 = sandbox.stub(inst._ethereum.getWeb3().eth.net, "getId");
+      stub6.resolves(1);
+      const chainId = await inst._ethereum.getWeb3().eth.getChainId();
+      const networkId = await inst._ethereum.getWeb3().eth.net.getId();
+      const stub7 = sandbox.stub(inst._ethereum, "getTx");
+      stub7.callsFake(function (...arg) {
+        let tx = inst._ethereum.getTx.wrappedMethod.apply(this, arg);
+        tx.chainId = chainId;
+        tx.networkId = networkId;
+        return tx;
+      });
       const hash = await inst.deposit(config.ETHEREUM_SECRET, config.JINGTUM_ADDRESS, "0.001");
       expect(hash).to.equal("1");
       expect(stub3.calledOnceWith(config.MOCK_SIGN)).to.true;
@@ -178,13 +189,24 @@ describe("test Fingate", function () {
         }
       });
       const stub1 = sandbox.stub(inst._ethereum.getWeb3().eth, "getGasPrice");
-      stub1.yields(null, "20000000000");
+      stub1.resolves("20000000000");
       const stub3 = sandbox.stub(inst._ethereum.getWeb3().eth, "sendSignedTransaction");
-      stub3.yields(null, "1");
+      stub3.resolves({ transactionHash: "1" });
       const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "send");
       stub4.yields(null, 0);
-      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth.accounts._ethereumCall, "getChainId");
+      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth, "getChainId");
       stub5.resolves(1);
+      const stub6 = sandbox.stub(inst._ethereum.getWeb3().eth.net, "getId");
+      stub6.resolves(1);
+      const chainId = await inst._ethereum.getWeb3().eth.getChainId();
+      const networkId = await inst._ethereum.getWeb3().eth.net.getId();
+      const stub7 = sandbox.stub(inst._ethereum, "getTx");
+      stub7.callsFake(function (...arg) {
+        let tx = inst._ethereum.getTx.wrappedMethod.apply(this, arg);
+        tx.chainId = chainId;
+        tx.networkId = networkId;
+        return tx;
+      });
       const hash = await inst.deposit(config.ETHEREUM_SECRET, config.JINGTUM_ADDRESS, "0.001", 0);
       expect(hash).to.equal("1");
       expect(stub3.calledOnceWith(config.MOCK_SIGN)).to.true;
@@ -204,7 +226,7 @@ describe("test Fingate", function () {
 
     it("reject error", async function () {
       try {
-        await inst.deposit(config.ETHEREUM_SECRET, config.JINGTUM_ADDRESS, 0.001);
+        inst.deposit(config.ETHEREUM_SECRET, config.JINGTUM_ADDRESS, 0.001);
       } catch (error) {
         expect(error).to.be.an("error");
       }
@@ -242,7 +264,7 @@ describe("test Fingate", function () {
 
     it("reject error", async function () {
       try {
-        await inst.depositToken(config.JINGTUM_ADDRESS, config.JC_CONTRACT, 18, 1, config.MOCK_HASH, config.ETHEREUM_SECRET);
+        inst.depositToken(config.JINGTUM_ADDRESS, config.JC_CONTRACT, 18, 1, config.MOCK_HASH, config.ETHEREUM_SECRET);
       } catch (error) {
         expect(error).to.be.an("error");
       }
@@ -256,15 +278,26 @@ describe("test Fingate", function () {
         }
       });
       const stub1 = sandbox.stub(inst._ethereum.getWeb3().eth, "getGasPrice");
-      stub1.yields(null, "20000000000");
+      stub1.resolves("20000000000");
       const stub2 = sandbox.stub(inst._ethereum.getWeb3().eth, "getTransactionCount");
-      stub2.yields(null, 0);
+      stub2.resolves(0);
       const stub3 = sandbox.stub(inst._ethereum.getWeb3().eth, "sendSignedTransaction");
-      stub3.yields(null, config.MOCK_HASH);
+      stub3.resolves({ transactionHash: config.MOCK_HASH });
       const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "send");
       stub4.yields(null, 0);
-      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth.accounts._ethereumCall, "getChainId");
+      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth, "getChainId");
       stub5.resolves(1);
+      const stub6 = sandbox.stub(inst._ethereum.getWeb3().eth.net, "getId");
+      stub6.resolves(1);
+      const chainId = await inst._ethereum.getWeb3().eth.getChainId();
+      const networkId = await inst._ethereum.getWeb3().eth.net.getId();
+      const stub7 = sandbox.stub(inst._ethereum, "getTx");
+      stub7.callsFake(function (...arg) {
+        let tx = inst._ethereum.getTx.wrappedMethod.apply(this, arg);
+        tx.chainId = chainId;
+        tx.networkId = networkId;
+        return tx;
+      });
       const hash = await inst.depositToken(config.JINGTUM_ADDRESS, config.JC_CONTRACT, 18, "0.1", config.MOCK_TRANSFER_HASH, config.ETHEREUM_SECRET);
       expect(hash).to.equal(config.MOCK_HASH);
       expect(stub3.calledOnceWith(config.MOCK_DEPOSITTOKEN_SIGN)).to.true;
@@ -278,13 +311,24 @@ describe("test Fingate", function () {
         }
       });
       const stub1 = sandbox.stub(inst._ethereum.getWeb3().eth, "getGasPrice");
-      stub1.yields(null, "20000000000");
+      stub1.resolves("20000000000");
       const stub3 = sandbox.stub(inst._ethereum.getWeb3().eth, "sendSignedTransaction");
-      stub3.yields(null, config.MOCK_HASH);
+      stub3.resolves({ transactionHash: config.MOCK_HASH });
       const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "send");
       stub4.yields(null, 0);
-      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth.accounts._ethereumCall, "getChainId");
+      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth, "getChainId");
       stub5.resolves(1);
+      const stub6 = sandbox.stub(inst._ethereum.getWeb3().eth.net, "getId");
+      stub6.resolves(1);
+      const chainId = await inst._ethereum.getWeb3().eth.getChainId();
+      const networkId = await inst._ethereum.getWeb3().eth.net.getId();
+      const stub7 = sandbox.stub(inst._ethereum, "getTx");
+      stub7.callsFake(function (...arg) {
+        let tx = inst._ethereum.getTx.wrappedMethod.apply(this, arg);
+        tx.chainId = chainId;
+        tx.networkId = networkId;
+        return tx;
+      });
       const hash = await inst.depositToken(config.JINGTUM_ADDRESS, config.JC_CONTRACT, 18, "0.1", config.MOCK_TRANSFER_HASH, config.ETHEREUM_SECRET, 0);
       expect(hash).to.equal(config.MOCK_HASH);
       expect(stub3.calledOnceWith(config.MOCK_DEPOSITTOKEN_SIGN)).to.true;

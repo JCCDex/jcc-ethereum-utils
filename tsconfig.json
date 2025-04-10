@@ -1,9 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "es2015"
-    ],
+    "target": "es6",
+    "lib": ["es2020"],
     "outDir": "lib",
     "rootDir": "src",
     "moduleResolution": "node",
@@ -11,9 +9,9 @@
     "noUnusedParameters": true,
     "declaration": true,
     "experimentalDecorators": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "allowSyntheticDefaultImports": true,
+    "module": "commonjs"
   },
-  "include": [
-    "src/**/*.ts"
-  ]
+  "include": ["src/**/*.ts"]
 }

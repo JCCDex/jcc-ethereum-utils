@@ -5,7 +5,8 @@ const Ethereum = require("../lib").Ethereum;
 const sinon = require("sinon");
 const sandbox = sinon.createSandbox();
 const config = require("./config");
-const Contract = require("web3-eth-contract");
+const { Contract } = require("web3-eth-contract");
+const { FetchError } = require("node-fetch");
 
 describe("test EtherFingate", function () {
   describe("test constructor", function () {
@@ -102,7 +103,14 @@ describe("test EtherFingate", function () {
       try {
         await inst.transfer(config.ETHEREUM_SECRET, config.JC_CONTRACT, 1);
       } catch (error) {
-        expect(error).to.be.an("error");
+        if (typeof window === "undefined") {
+          // Node.js 环境
+          expect(error).to.be.an.instanceOf(FetchError);
+          expect(error.message).to.include("request to http://localhost/ failed, reason: connect ECONNREFUSED 127.0.0.1:80");
+        } else {
+          // 浏览器环境
+          expect(error).to.be.an.instanceOf(TypeError);
+        }
       }
     });
 
@@ -124,15 +132,26 @@ describe("test EtherFingate", function () {
         }
       });
       const stub1 = sandbox.stub(inst._ethereum.getWeb3().eth, "getGasPrice");
-      stub1.yields(null, "20000000000");
+      stub1.resolves("20000000000");
       const stub2 = sandbox.stub(inst._ethereum.getWeb3().eth, "getTransactionCount");
-      stub2.yields(null, 0);
+      stub2.resolves("0");
       const stub3 = sandbox.stub(inst._ethereum.getWeb3().eth, "sendSignedTransaction");
-      stub3.yields(null, "1");
+      stub3.resolves({ transactionHash: "1" });
       const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "send");
       stub4.yields(null, 0);
-      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth.accounts._ethereumCall, "getChainId");
+      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth, "getChainId");
       stub5.resolves(1);
+      const stub6 = sandbox.stub(inst._ethereum.getWeb3().eth.net, "getId");
+      stub6.resolves(1);
+      const chainId = await inst._ethereum.getWeb3().eth.getChainId();
+      const networkId = await inst._ethereum.getWeb3().eth.net.getId();
+      const stub7 = sandbox.stub(inst._ethereum, "getTx");
+      stub7.callsFake(function (...arg) {
+        let tx = inst._ethereum.getTx.wrappedMethod.apply(this, arg);
+        tx.chainId = chainId;
+        tx.networkId = networkId;
+        return tx;
+      });
       const hash = await inst.transfer(config.ETHEREUM_SECRET, config.SC_ADDRESS, "1");
       expect(hash).to.equal("1");
       expect(stub3.calledOnceWith(config.MOCK_TRANSFER_SIGN)).to.true;
@@ -156,13 +175,24 @@ describe("test EtherFingate", function () {
         }
       });
       const stub1 = sandbox.stub(inst._ethereum.getWeb3().eth, "getGasPrice");
-      stub1.yields(null, "20000000000");
+      stub1.resolves("20000000000");
       const stub3 = sandbox.stub(inst._ethereum.getWeb3().eth, "sendSignedTransaction");
-      stub3.yields(null, "1");
+      stub3.resolves({ transactionHash: "1" });
       const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "send");
       stub4.yields(null, 0);
-      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth.accounts._ethereumCall, "getChainId");
+      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth, "getChainId");
       stub5.resolves(1);
+      const stub6 = sandbox.stub(inst._ethereum.getWeb3().eth.net, "getId");
+      stub6.resolves(1);
+      const chainId = await inst._ethereum.getWeb3().eth.getChainId();
+      const networkId = await inst._ethereum.getWeb3().eth.net.getId();
+      const stub7 = sandbox.stub(inst._ethereum, "getTx");
+      stub7.callsFake(function (...arg) {
+        let tx = inst._ethereum.getTx.wrappedMethod.apply(this, arg);
+        tx.chainId = chainId;
+        tx.networkId = networkId;
+        return tx;
+      });
       const hash = await inst.transfer(config.ETHEREUM_SECRET, config.SC_ADDRESS, "1", 0);
       expect(hash).to.equal("1");
       expect(stub3.calledOnceWith(config.MOCK_TRANSFER_SIGN)).to.true;

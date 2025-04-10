@@ -24,8 +24,12 @@ const config = {
       "eth-lib": path.resolve(__dirname, "node_modules/eth-lib"),
       "safe-buffer": path.resolve(__dirname, "node_modules/safe-buffer"),
       "js-sha3": path.resolve(__dirname, "node_modules/js-sha3"),
-      inherits: path.resolve(__dirname, "node_modules/inherits")
-    }
+      inherits: path.resolve(__dirname, "node_modules/inherits"),
+      "ethers/crypto": path.resolve(__dirname, "node_modules/ethers/lib.commonjs/crypto"),
+      "ethers/transaction": path.resolve(__dirname, "node_modules/ethers/lib.commonjs/transaction"),
+      "ethers/utils": path.resolve(__dirname, "node_modules/ethers/lib.commonjs/utils")
+    },
+    extensions: [".js", ".json", ".ts"]
   },
   mode: process.env.MODE === "dev" ? "development" : "production",
   node: {
@@ -37,11 +41,12 @@ const config = {
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
-        use: "ts-loader"
+        test: /\.(ts|tsx)$/,
+        use: "ts-loader",
+        exclude: /node_modules/
       },
       {
-        test: /\.js$/,
+        test: /\.(cjs|mjs|js|jsx)$/,
         loader: "babel-loader"
       }
     ]

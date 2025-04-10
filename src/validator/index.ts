@@ -1,6 +1,6 @@
 import BigNumber from "bignumber.js";
-import * as ethWallet from "jcc_wallet/lib/eth";
-import * as jtWallet from "jcc_wallet/lib/jingtum";
+import { ethWallet } from "jcc_wallet";
+import { jtWallet } from "jcc_wallet";
 
 const router = Symbol();
 const checkEthereumAddressKey = Symbol();
@@ -39,7 +39,7 @@ export const isValidAmount = (target: any, name: string, index: number) => {
 export const validate = (target: any, name: string, descriptor: PropertyDescriptor) => {
   const method = descriptor.value;
 
-  descriptor.value = function() {
+  descriptor.value = function () {
     const params = target[router][name].params;
     /* istanbul ignore else */
     if (Array.isArray(params)) {

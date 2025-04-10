@@ -4,7 +4,7 @@ const Ethereum = require("../lib").Ethereum;
 const sinon = require("sinon");
 const sandbox = sinon.createSandbox();
 const config = require("./config");
-const Contract = require("web3-eth-contract");
+const { Contract } = require("web3-eth-contract");
 const fingateABI = require("../lib/abi/fingateABI").default;
 
 describe("test Ethereum", function () {
@@ -102,12 +102,18 @@ describe("test Ethereum", function () {
       expect(inst.defaultGasPrice).to.equal(10 ** 10);
       expect(inst.gasLimit).to.equal(200000);
       expect(inst.minGasPrice).to.equal(5 * 10 ** 9);
+      expect(inst.minFeePerGas).to.equal(5 * 10 ** 9);
+      expect(inst.minPriorityFeePerGas).to.equal(10 ** 9);
       inst.gasLimit = 1;
       inst.minGasPrice = 1;
       inst.defaultGasPrice = 1;
+      inst.minFeePerGas = 1;
+      inst.minPriorityFeePerGas = 1;
       expect(inst.defaultGasPrice).to.equal(1);
       expect(inst.gasLimit).to.equal(1);
       expect(inst.minGasPrice).to.equal(1);
+      expect(inst.minFeePerGas).to.equal(1);
+      expect(inst.minPriorityFeePerGas).to.equal(1);
     });
   });
 
@@ -124,7 +130,7 @@ describe("test Ethereum", function () {
 
     it("get transaction successfully", function (done) {
       let stub = sandbox.stub(inst._web3.eth, "getTransaction");
-      stub.yields(null, config.MOCK_HASH_TRANSACTION);
+      stub.resolves(config.MOCK_HASH_TRANSACTION);
       inst.getTransaction(config.MOCK_HASH).then((data) => {
         expect(data).to.equal(config.MOCK_HASH_TRANSACTION);
         done();
@@ -133,7 +139,7 @@ describe("test Ethereum", function () {
 
     it("get transaction in error", function (done) {
       let stub = sandbox.stub(inst._web3.eth, "getTransaction");
-      stub.yields(new Error("connect net in error"), null);
+      stub.rejects(new Error("connect net in error"));
       inst.getTransaction(config.MOCK_HASH).catch((err) => {
         expect(err.message).to.equal("connect net in error");
         done();
@@ -154,7 +160,7 @@ describe("test Ethereum", function () {
 
     it("get transaction receipt successfully", function (done) {
       let stub = sandbox.stub(inst._web3.eth, "getTransactionReceipt");
-      stub.yields(null, config.MOCK_HASH_TRANSACTION_RECEIPT);
+      stub.resolves(config.MOCK_HASH_TRANSACTION_RECEIPT);
       inst.getTransactionReceipt(config.MOCK_HASH).then((data) => {
         expect(data).to.equal(config.MOCK_HASH_TRANSACTION_RECEIPT);
         done();
@@ -163,7 +169,7 @@ describe("test Ethereum", function () {
 
     it("get transaction receipt in error", function (done) {
       let stub = sandbox.stub(inst._web3.eth, "getTransactionReceipt");
-      stub.yields(new Error("connect net in error"), null);
+      stub.rejects(new Error("connect net in error"));
       inst.getTransactionReceipt(config.MOCK_HASH).catch((err) => {
         expect(err.message).to.equal("connect net in error");
         done();
@@ -191,7 +197,7 @@ describe("test Ethereum", function () {
 
     it("if request fail", async function () {
       const stub = sandbox.stub(inst._web3.eth, "getBlock");
-      stub.yields(new Error(), null);
+      stub.rejects(new Error());
       const block = await inst.getBlock(1);
       expect(block).to.equal(null);
     });
@@ -229,16 +235,61 @@ describe("test Ethereum", function () {
 
     it("resolve default gas price", async function () {
       const stub = sandbox.stub(inst._web3.eth, "getGasPrice");
-      stub.yields(new Error(), null);
+      stub.rejects(new Error());
       const gasPrice = await inst.getGasPrice();
       expect(gasPrice).to.equal(10 ** 10);
     });
 
     it("resolve min gas price", async function () {
       const stub = sandbox.stub(inst._web3.eth, "getGasPrice");
-      stub.yields(null, 10 ** 9);
+      stub.resolves(10 ** 9);
       const gasPrice = await inst.getGasPrice();
       expect(gasPrice).to.equal(5 * 10 ** 9);
+    });
+  });
+
+  describe("test getFeeData", function () {
+    let inst;
+    const feeDataDemo = {
+      gasPrice: 1,
+      maxFeePerGas: 1,
+      maxPriorityFeePerGas: 1,
+      baseFeePerGas: 1
+    };
+    before(() => {
+      inst = new Ethereum(config.MOCK_NODE);
+      inst.initWeb3();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it("resolve default gas price", async function () {
+      const stub = sandbox.stub(inst._web3.eth, "calculateFeeData");
+      stub.rejects(new Error());
+      const feeData = await inst.getFeeData();
+      expect(feeData.gasPrice).to.equal(10 ** 10);
+    });
+
+    it("support EIP1559, resolve min info", async function () {
+      const stub = sandbox.stub(inst._web3.eth, "calculateFeeData");
+      stub.resolves(feeDataDemo);
+      const getFeeData = await inst.getFeeData();
+      expect(getFeeData.gasPrice).to.equal(5 * 10 ** 9);
+      expect(getFeeData.maxFeePerGas).to.equal(5 * 10 ** 9);
+      expect(getFeeData.maxPriorityFeePerGas).to.equal(10 ** 9);
+      expect(getFeeData.baseFeePerGas).to.equal(1);
+    });
+
+    it("not support EIP1559, resolve min info", async function () {
+      const stub = sandbox.stub(inst._web3.eth, "calculateFeeData");
+      stub.resolves({ gasPrice: 1 });
+      const getFeeData = await inst.getFeeData();
+      expect(getFeeData.gasPrice).to.equal(5 * 10 ** 9);
+      expect(getFeeData.maxFeePerGas).to.equal(undefined);
+      expect(getFeeData.maxPriorityFeePerGas).to.equal(undefined);
+      expect(getFeeData.baseFeePerGas).to.equal(undefined);
     });
   });
 
@@ -255,7 +306,7 @@ describe("test Ethereum", function () {
 
     it("reject error if getTransactionCount failed", async function () {
       const stub = sandbox.stub(inst._web3.eth, "getTransactionCount");
-      stub.yields(new Error("getTransactionCount failed"), null);
+      stub.rejects(new Error("getTransactionCount failed"));
       const spy = sandbox.spy(inst._web3.currentProvider, "send");
       try {
         await inst.getNonce(config.ETHEREUM_ADDRESS);
@@ -268,7 +319,7 @@ describe("test Ethereum", function () {
 
     it("reject error if send failed", async function () {
       const stub = sandbox.stub(inst._web3.eth, "getTransactionCount");
-      stub.yields(null, 0);
+      stub.resolves(0);
       const s1 = sandbox.stub(inst._web3.currentProvider, "send");
       s1.yields(new Error("send failed"), null);
       try {
@@ -280,7 +331,7 @@ describe("test Ethereum", function () {
 
     it("resolve 11", async function () {
       const stub = sandbox.stub(inst._web3.eth, "getTransactionCount");
-      stub.yields(null, 10);
+      stub.resolves(10);
       const s1 = sandbox.stub(inst._web3.currentProvider, "send");
       s1.yields(null, { result: 11 });
       const nonce = await inst.getNonce("2995c1376a852e4040caf9dbae2c765e24c37a15");
@@ -298,7 +349,7 @@ describe("test Ethereum", function () {
 
     it("resolve 10", async function () {
       const stub = sandbox.stub(inst._web3.eth, "getTransactionCount");
-      stub.yields(null, 10);
+      stub.resolves(10);
       const s1 = sandbox.stub(inst._web3.currentProvider, "send");
       s1.yields(null, { result: 9 });
       const nonce = await inst.getNonce("2995c1376a852e4040caf9dbae2c765e24c37a15");
@@ -316,7 +367,7 @@ describe("test Ethereum", function () {
   });
 
   describe("test signTransaction", function () {
-    it("return correct result", async function () {
+    it("return correct result: legacy", async function () {
       let inst = new Ethereum(config.MOCK_NODE);
       inst.initWeb3();
       const to = "0x3907acb4c1818adf72d965c08e0a79af16e7ffb8";
@@ -330,8 +381,12 @@ describe("test Ethereum", function () {
         to,
         value: "0x38d7ea4c68000"
       });
-      const stub5 = sandbox.stub(inst.getWeb3().eth.accounts._ethereumCall, "getChainId");
+      const stub5 = sandbox.stub(inst._web3.eth, "getChainId");
       stub5.resolves(1);
+      const stub6 = sandbox.stub(inst._web3.eth.net, "getId");
+      stub6.resolves(1);
+      tx.chainId = await inst._web3.eth.getChainId();
+      tx.networkId = await inst._web3.eth.net.getId();
       const sign = await inst.signTransaction(tx, config.ETHEREUM_SECRET);
       expect(sign).to.equal(config.MOCK_SIGN);
       inst = new Ethereum(config.MOCK_NODE);
@@ -341,6 +396,42 @@ describe("test Ethereum", function () {
         nonce: 0,
         gasPrice: "0x4a817c800",
         gas: "0x249f0",
+        from: config.ETHEREUM_ADDRESS,
+        to,
+        value: "0x38d7ea4c68000"
+      });
+    });
+
+    it("return correct result: eip1559", async function () {
+      let inst = new Ethereum(config.MOCK_NODE);
+      inst.initWeb3();
+      const to = "0x3907acb4c1818adf72d965c08e0a79af16e7ffb8";
+      const tx = inst.get1559Tx(config.ETHEREUM_ADDRESS, to, 0, 150000, "30000000000", "2500000000", "0.001", config.CALLDATA);
+      expect(tx).to.deep.equal({
+        data: config.CALLDATA,
+        nonce: 0,
+        gasLimit: "0x249f0",
+        maxFeePerGas: "0x6fc23ac00",
+        maxPriorityFeePerGas: "0x9502f900",
+        from: config.ETHEREUM_ADDRESS,
+        to,
+        value: "0x38d7ea4c68000"
+      });
+      const stub5 = sandbox.stub(inst._web3.eth, "getChainId");
+      stub5.resolves(1);
+      const stub6 = sandbox.stub(inst._web3.eth.net, "getId");
+      stub6.resolves(1);
+      tx.chainId = await inst._web3.eth.getChainId();
+      tx.networkId = await inst._web3.eth.net.getId();
+      const sign = await inst.signTransaction(tx, config.ETHEREUM_SECRET);
+      expect(sign).to.equal(config.MOCK_SIGN_1559);
+
+      expect(inst.get1559Tx(config.ETHEREUM_ADDRESS, to, 0, 150000, "30000000000", "2500000000", "0.001", "")).to.deep.equal({
+        data: "0x0",
+        nonce: 0,
+        gasLimit: "0x249f0",
+        maxFeePerGas: "0x6fc23ac00",
+        maxPriorityFeePerGas: "0x9502f900",
         from: config.ETHEREUM_ADDRESS,
         to,
         value: "0x38d7ea4c68000"
@@ -361,7 +452,7 @@ describe("test Ethereum", function () {
 
     it("resolve hash if success", async function () {
       const stub = sandbox.stub(inst._web3.eth, "sendSignedTransaction");
-      stub.yields(null, "1");
+      stub.resolves({ transactionHash: "1" });
       const hash = await inst.sendSignedTransaction("test");
       expect(stub.calledOnceWith("test")).to.true;
       expect(hash).to.equal("1");
@@ -369,7 +460,7 @@ describe("test Ethereum", function () {
 
     it("reject error if failed", async function () {
       const stub = sandbox.stub(inst._web3.eth, "sendSignedTransaction");
-      stub.yields(new Error("failed"), null);
+      stub.rejects(new Error("failed"));
       try {
         await inst.sendSignedTransaction("test");
       } catch (error) {

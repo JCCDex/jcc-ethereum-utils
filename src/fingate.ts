@@ -135,7 +135,7 @@ class Fingate extends SmartContract {
    */
   @validate
   public async depositToken(@isValidJingtumAddress jtAddress: string, @isValidEthereumAddress tokenAddress: string, decimals: number, @isValidAmount amount: string, @isValidHash hash: string, @isValidEthereumSecret secret: string, nonce?: number): Promise<string> {
-    const value = this.ethereum.getWeb3().utils.toHex(new BigNumber(amount).multipliedBy(10 ** decimals).toString(10));
+    const value = this.ethereum.getWeb3().utils.numberToHex(new BigNumber(amount).multipliedBy(10 ** decimals).toString(10));
     const address = Ethereum.getAddress(secret);
     nonce = new BigNumber(nonce).isInteger() ? nonce : await this.ethereum.getNonce(address);
     const gasPrice = await this.ethereum.getGasPrice();
