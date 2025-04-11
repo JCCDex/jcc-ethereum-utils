@@ -307,61 +307,18 @@ describe("test Ethereum", function () {
     it("reject error if getTransactionCount failed", async function () {
       const stub = sandbox.stub(inst._web3.eth, "getTransactionCount");
       stub.rejects(new Error("getTransactionCount failed"));
-      const spy = sandbox.spy(inst._web3.currentProvider, "send");
       try {
         await inst.getNonce(config.ETHEREUM_ADDRESS);
       } catch (error) {
         expect(error.message).to.equal("getTransactionCount failed");
         expect(stub.calledOnceWith(config.ETHEREUM_ADDRESS)).to.true;
-        expect(spy.calledOnce).to.false;
       }
-    });
-
-    it("reject error if send failed", async function () {
-      const stub = sandbox.stub(inst._web3.eth, "getTransactionCount");
-      stub.resolves(0);
-      const s1 = sandbox.stub(inst._web3.currentProvider, "send");
-      s1.yields(new Error("send failed"), null);
-      try {
-        await inst.getNonce(config.ETHEREUM_ADDRESS);
-      } catch (error) {
-        expect(error.message).to.equal("send failed");
-      }
-    });
-
-    it("resolve 11", async function () {
-      const stub = sandbox.stub(inst._web3.eth, "getTransactionCount");
-      stub.resolves(10);
-      const s1 = sandbox.stub(inst._web3.currentProvider, "send");
-      s1.yields(null, { result: 11 });
-      const nonce = await inst.getNonce("2995c1376a852e4040caf9dbae2c765e24c37a15");
-      expect(stub.calledOnceWith(config.ETHEREUM_ADDRESS)).to.true;
-      expect(
-        s1.calledOnceWith({
-          method: "parity_nextNonce",
-          params: [config.ETHEREUM_ADDRESS],
-          jsonrpc: "2.0",
-          id: 1
-        })
-      ).to.true;
-      expect(nonce).to.equal(11);
     });
 
     it("resolve 10", async function () {
       const stub = sandbox.stub(inst._web3.eth, "getTransactionCount");
       stub.resolves(10);
-      const s1 = sandbox.stub(inst._web3.currentProvider, "send");
-      s1.yields(null, { result: 9 });
       const nonce = await inst.getNonce("2995c1376a852e4040caf9dbae2c765e24c37a15");
-      expect(stub.calledOnceWith(config.ETHEREUM_ADDRESS)).to.true;
-      expect(
-        s1.calledOnceWith({
-          method: "parity_nextNonce",
-          params: [config.ETHEREUM_ADDRESS],
-          jsonrpc: "2.0",
-          id: 1
-        })
-      ).to.true;
       expect(nonce).to.equal(10);
     });
   });
@@ -491,44 +448,63 @@ describe("test Ethereum", function () {
       sandbox.restore();
     });
     it("resolve true if has pending transaction", async function () {
-      const s1 = sandbox.stub(inst._web3.currentProvider, "send");
-      s1.yields(null, {
-        result: [
-          {
-            from: config.ETHEREUM_ADDRESS
-          }
-        ]
-      });
+      const s1 = sandbox.stub(inst._web3.eth, "getPendingTransactions");
+      s1.resolves([{ from: config.ETHEREUM_ADDRESS }]);
       let hasPending = await inst.hasPendingTransactions(config.ETHEREUM_ADDRESS.substring(2));
       expect(hasPending).to.true;
     });
 
     it("resolve false if has't pending transaction", async function () {
-      const stub = sandbox.stub(inst._web3.currentProvider, "send");
-      stub.yields(null, {
-        result: [
-          {
-            from: "aaa"
-          }
-        ]
-      });
+      const stub = sandbox.stub(inst._web3.eth, "getPendingTransactions");
+      stub.resolves([{ from: "aaa" }]);
       let hasPending = await inst.hasPendingTransactions(config.ETHEREUM_ADDRESS.substring(2));
       expect(hasPending).to.false;
-      expect(
-        stub.calledOnceWith({
-          method: "parity_pendingTransactions",
-          params: [],
-          jsonrpc: "2.0",
-          id: 1
-        })
-      ).to.true;
+      expect(stub.calledOnceWith()).to.true;
     });
 
     it("reject error", async function () {
-      const stub = sandbox.stub(inst._web3.currentProvider, "send");
-      stub.yields(new Error("failed"), null);
+      const stub = sandbox.stub(inst._web3.eth, "getPendingTransactions");
+      stub.rejects(new Error("failed"));
       try {
         await inst.hasPendingTransactions(config.ETHEREUM_ADDRESS.substring(2));
+      } catch (error) {
+        expect(error.message).to.equal("failed");
+      }
+    });
+  });
+
+  describe("test hasPendingBlockTransactions", function () {
+    let inst;
+    before(() => {
+      inst = new Ethereum(config.MOCK_NODE);
+      inst.initWeb3();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it("resolve true if has pending block transaction", async function () {
+      const s1 = sandbox.stub(inst._web3.eth, "getBlock");
+      s1.resolves({ transactions: [{ from: config.ETHEREUM_ADDRESS }] });
+      let hasPending = await inst.hasPendingBlockTransactions(config.ETHEREUM_ADDRESS.substring(2));
+      expect(hasPending).to.true;
+      expect(s1.calledOnceWith("pending", true)).to.true;
+    });
+
+    it("resolve false if has't pending block transaction", async function () {
+      const stub = sandbox.stub(inst._web3.eth, "getBlock");
+      stub.resolves({ transactions: [{ from: "aaa" }] });
+      let hasPending = await inst.hasPendingBlockTransactions(config.ETHEREUM_ADDRESS.substring(2));
+      expect(hasPending).to.false;
+      expect(stub.calledOnceWith("pending", true)).to.true;
+    });
+
+    it("reject error", async function () {
+      const stub = sandbox.stub(inst._web3.eth, "getBlock");
+      stub.rejects(new Error("failed"));
+      try {
+        await inst.hasPendingBlockTransactions(config.ETHEREUM_ADDRESS.substring(2));
       } catch (error) {
         expect(error.message).to.equal("failed");
       }

@@ -2,7 +2,7 @@
 /// <reference path = "./types/transaction.ts" />
 /// <reference path = "./types/feeData.ts" />
 
-import BigNumber from "bignumber.js";
+// import BigNumber from "bignumber.js";
 import { ethWallet } from "jcc_wallet";
 import { IWalletModel } from "jcc_wallet/lib/types";
 import { Contract } from "web3-eth-contract";
@@ -352,26 +352,7 @@ export default class Ethereum {
     address = Ethereum.prefix0x(address);
     try {
       const ethCount = await this._web3.eth.getTransactionCount(address);
-
-      return new Promise((resolve, reject) => {
-        this._web3.currentProvider.send(
-          {
-            id: 1,
-            jsonrpc: "2.0",
-            method: "parity_nextNonce",
-            params: [address]
-          },
-          (error, response) => {
-            if (error) {
-              return reject(error);
-            }
-
-            const count = new BigNumber(response.result).toNumber();
-            const nonce = count > ethCount ? count : ethCount;
-            return resolve(nonce);
-          }
-        );
-      });
+      return ethCount;
     } catch (error) {
       throw error;
     }
@@ -385,32 +366,44 @@ export default class Ethereum {
    * @memberof Ethereum
    */
   public async hasPendingTransactions(address: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      this._web3.currentProvider.send(
-        {
-          id: 1,
-          jsonrpc: "2.0",
-          method: "parity_pendingTransactions",
-          params: []
-        },
-        (err, res) => {
-          if (err) {
-            return reject(err);
-          }
-          address = Ethereum.prefix0x(address).toLowerCase();
-          let i = 0;
-          let hasPending = false;
-          for (i = 0; i < res.result.length; i++) {
-            const pending = res.result[i];
-            if (address.includes(pending.from.toLowerCase())) {
-              hasPending = true;
-              break;
-            }
-          }
-          return resolve(hasPending);
+    try {
+      const pendingList = await this._web3.eth.getPendingTransactions();
+      address = Ethereum.prefix0x(address).toLowerCase();
+      let hasPending = false;
+      for (const pending of pendingList) {
+        if (address.includes(pending.from.toLowerCase())) {
+          hasPending = true;
+          break;
         }
-      );
-    });
+      }
+      return hasPending;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * check if has pending block transaction
+   *
+   * @param {string} address
+   * @returns {Promise<boolean>} resolve true if has pending block transaction
+   * @memberof Ethereum
+   */
+  public async hasPendingBlockTransactions(address: string): Promise<boolean> {
+    try {
+      const pendingBlock = await this._web3.eth.getBlock("pending", true);
+      address = Ethereum.prefix0x(address).toLowerCase();
+      let hasPending = false;
+      for (const pending of pendingBlock.transactions) {
+        if (address.includes(pending.from.toLowerCase())) {
+          hasPending = true;
+          break;
+        }
+      }
+      return hasPending;
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
