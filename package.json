@@ -10,8 +10,9 @@
     "deploy": "./publish.sh",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "test": "npm run test:node && npm run test:browser",
-    "test:node": "tsc && nyc --extension=.ts --reporter=lcov --reporter=html --reporter=text mocha --timeout=3000 test/*.spec.js",
+    "test:node": "tsc && nyc --extension=.ts --reporter=lcov --reporter=html --reporter=text --exclude='**/test/ropsten.spec.js' mocha --timeout=3000 test/*.spec.js",
     "test:browser": "tsc && karma start karma.conf.js",
+    "test:ropsten": "tsc && mocha --timeout=3000 test/ropsten.spec.js",
     "tslint": "tslint --project tsconfig.json --config tslint.json",
     "compile": "./compile.sh",
     "pretty": "prettier --write {src,test}/**/*.{js,ts}"
