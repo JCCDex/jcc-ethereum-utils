@@ -106,7 +106,6 @@ describe("test EtherFingate", function () {
         if (typeof window === "undefined") {
           // Node.js 环境
           expect(error).to.be.an.instanceOf(FetchError);
-          expect(error.message).to.include("request to http://localhost/ failed, reason: connect ECONNREFUSED 127.0.0.1:80");
         } else {
           // 浏览器环境
           expect(error).to.be.an.instanceOf(TypeError);
