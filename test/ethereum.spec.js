@@ -272,6 +272,21 @@ describe("test Ethereum", function () {
       expect(feeData.gasPrice).to.equal(10 ** 10);
     });
 
+    it("support EIP1559, resolve info", async function () {
+      const stub = sandbox.stub(inst._web3.eth, "calculateFeeData");
+      stub.resolves({
+        gasPrice: 6 * 10 ** 9,
+        maxFeePerGas: 6 * 10 ** 9,
+        maxPriorityFeePerGas: 2 * 10 ** 9,
+        baseFeePerGas: 300000
+      });
+      const getFeeData = await inst.getFeeData();
+      expect(getFeeData.gasPrice).to.equal(6 * 10 ** 9);
+      expect(getFeeData.maxFeePerGas).to.equal(6 * 10 ** 9);
+      expect(getFeeData.maxPriorityFeePerGas).to.equal(2 * 10 ** 9);
+      expect(getFeeData.baseFeePerGas).to.equal(300000);
+    });
+
     it("support EIP1559, resolve min info", async function () {
       const stub = sandbox.stub(inst._web3.eth, "calculateFeeData");
       stub.resolves(feeDataDemo);
@@ -348,7 +363,7 @@ describe("test Ethereum", function () {
       expect(sign).to.equal(config.MOCK_SIGN);
       inst = new Ethereum(config.MOCK_NODE);
       inst.initWeb3();
-      expect(inst.getTx(config.ETHEREUM_ADDRESS, to, 0, 150000, "20000000000", "0.001", "")).to.deep.equal({
+      expect(inst.getTx(config.ETHEREUM_ADDRESS, to, 0, 150000, "20000000000", "0x38d7ea4c68000", "")).to.deep.equal({
         data: "0x0",
         nonce: 0,
         gasPrice: "0x4a817c800",
@@ -383,7 +398,7 @@ describe("test Ethereum", function () {
       const sign = await inst.signTransaction(tx, config.ETHEREUM_SECRET);
       expect(sign).to.equal(config.MOCK_SIGN_1559);
 
-      expect(inst.get1559Tx(config.ETHEREUM_ADDRESS, to, 0, 150000, "30000000000", "2500000000", "0.001", "")).to.deep.equal({
+      expect(inst.get1559Tx(config.ETHEREUM_ADDRESS, to, 0, 150000, "30000000000", "2500000000", "0x38d7ea4c68000", "")).to.deep.equal({
         data: "0x0",
         nonce: 0,
         gasLimit: "0x249f0",
