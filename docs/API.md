@@ -68,6 +68,24 @@ private _minGasPrice;
 private _defaultGasPrice;
 
 /**
+ * min fee per gas
+ *
+ * @private
+ * @type {number}
+ * @memberof Ethereum
+ */
+private _minFeePerGas: number;
+
+/**
+ * min priority fee per gas
+ *
+ * @private
+ * @type {number}
+ * @memberof Ethereum
+ */
+private _minPriorityFeePerGas: number;
+
+/**
  * set & get _gasLimit
  *
  * @type {number}
@@ -89,6 +107,20 @@ minGasPrice: number;
  * @memberof Ethereum
  */
 defaultGasPrice: number;
+
+/**
+ * set & get _minFeePerGas
+ *
+ * @memberof Ethereum
+ */
+minFeePerGas: number;
+
+/**
+ * set & get _minPriorityFeePerGas
+ *
+ * @memberof Ethereum
+ */
+minPriorityFeePerGas: number;
 
 /**
  * validate ethereum address
@@ -188,6 +220,14 @@ getBalance(address: string): Promise<string>;
 getGasPrice(): Promise<number>;
 
 /**
+ * request current fee data
+ *
+ * @returns {Promise<IFeeData>} resolve gas price if success
+ * @memberof Ethereum
+ */
+getFeeData(): Promise<IFeeData>;
+
+/**
  * request nonce
  *
  * @param {string} address ethereum address
@@ -206,6 +246,15 @@ getNonce(address: string): Promise<number>;
 hasPendingTransactions(address: string): Promise<boolean>;
 
 /**
+ * check if has pending block transaction
+ *
+ * @param {string} address
+ * @returns {Promise<boolean>} resolve true if has pending block transaction
+ * @memberof Ethereum
+ */
+hasPendingBlockTransactions(address: string): Promise<boolean>;
+
+/**
  * format transaction info
  *
  * @param {string} from sender address
@@ -218,7 +267,23 @@ hasPendingTransactions(address: string): Promise<boolean>;
  * @returns {IEthereumTransaction}
  * @memberof Ethereum
  */
-getTx(from: string, to: string, nonce: number, gasLimit: number, gasPrice: number, value: string, calldata: string): IEthereumTransaction;
+getTx(from: string, to: string, nonce: number, gasLimit: number, gasPrice: number, value: string, calldata: string): EthereumTransaction;
+
+/**
+ * format EIP1559 transaction info
+ *
+ * @param {string} from sender address
+ * @param {string} to destination address
+ * @param {number} nonce nonce
+ * @param {number} gasLimit gas limit
+ * @param {number} maxFeePerGas max fee per gas
+ * @param {number} maxPriorityFeePerGas max priority fee per gas
+ * @param {string} value value
+ * @param {string} calldata call data
+ * @returns {EthereumTransaction}
+ * @memberof Ethereum
+ */
+get1559Tx(from: string, to: string, nonce: number, gasLimit: number, maxFeePerGas: number, maxPriorityFeePerGas: number, value: string, calldata: string): EthereumTransaction;
 
 /**
  * sign transaction with ethereum secret
