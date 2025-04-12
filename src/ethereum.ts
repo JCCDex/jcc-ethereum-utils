@@ -1,12 +1,14 @@
 "use strict";
 /// <reference path = "./types/transaction.ts" />
+/// <reference path = "./types/feeData.ts" />
 
-import BigNumber from "bignumber.js";
-import * as ethWallet from "jcc_wallet/lib/eth";
+// import BigNumber from "bignumber.js";
+import { ethWallet } from "jcc_wallet";
 import { IWalletModel } from "jcc_wallet/lib/types";
 import { Contract } from "web3-eth-contract";
-const web3 = require("web3");
-const contractClass = require("web3-eth-contract");
+const { Web3 } = require("web3");
+// const contractClass = require("web3-eth-contract");
+import { ContractAbi } from "web3-types";
 
 /**
  * Toolkit of Ethereum
@@ -61,6 +63,24 @@ export default class Ethereum {
   private _defaultGasPrice: number;
 
   /**
+   * min fee per gas
+   *
+   * @private
+   * @type {number}
+   * @memberof Ethereum
+   */
+  private _minFeePerGas: number;
+
+  /**
+   * min priority fee per gas
+   *
+   * @private
+   * @type {number}
+   * @memberof Ethereum
+   */
+  private _minPriorityFeePerGas: number;
+
+  /**
    * Creates an instance of Ethereum
    * @param {string} node http node
    * @memberof Ethereum
@@ -71,6 +91,8 @@ export default class Ethereum {
     this._gasLimit = 200000;
     this._minGasPrice = 5 * 10 ** 9;
     this._defaultGasPrice = 10 ** 10;
+    this._minFeePerGas = 5 * 10 ** 9;
+    this._minPriorityFeePerGas = 10 ** 9;
   }
 
   /**
@@ -112,6 +134,34 @@ export default class Ethereum {
 
   public get defaultGasPrice(): number {
     return this._defaultGasPrice;
+  }
+
+  /**
+   * set & get _minFeePerGas
+   *
+   * @type {number}
+   * @memberof Ethereum
+   */
+  public set minFeePerGas(v: number) {
+    this._minFeePerGas = v;
+  }
+
+  public get minFeePerGas(): number {
+    return this._minFeePerGas;
+  }
+
+  /**
+   * set & get _minPriorityFeePerGas
+   *
+   * @type {number}
+   * @memberof Ethereum
+   */
+  public set minPriorityFeePerGas(v: number) {
+    this._minPriorityFeePerGas = v;
+  }
+
+  public get minPriorityFeePerGas(): number {
+    return this._minPriorityFeePerGas;
   }
 
   /**
@@ -198,7 +248,7 @@ export default class Ethereum {
    */
   public initWeb3() {
     if (!this._web3 || !this._web3.currentProvider) {
-      this._web3 = new web3(new web3.providers.HttpProvider(this._node));
+      this._web3 = new Web3(new Web3.providers.HttpProvider(this._node));
     }
   }
 
@@ -252,7 +302,7 @@ export default class Ethereum {
    */
   public async getBalance(address: string): Promise<string> {
     const wei = await this._web3.eth.getBalance(address);
-    const balance = this._web3.utils.fromWei(wei);
+    const balance = this._web3.utils.fromWei(wei, "ether");
     return balance;
   }
 
@@ -263,18 +313,32 @@ export default class Ethereum {
    * @memberof Ethereum
    */
   public async getGasPrice(): Promise<number> {
-    return new Promise((resolve) => {
-      this._web3.eth.getGasPrice((err, data) => {
-        if (err) {
-          data = this._defaultGasPrice;
-        }
-        const limit = this._minGasPrice;
-        if (data < limit) {
-          data = limit;
-        }
-        return resolve(data);
-      });
-    });
+    try {
+      const gasPrice = await this._web3.eth.getGasPrice();
+      return gasPrice < this._minGasPrice ? this._minGasPrice : gasPrice;
+    } catch (error) {
+      return this._defaultGasPrice;
+    }
+  }
+
+  /**
+   * request current fee data
+   *
+   * @returns {Promise<IFeeData>} resolve gas price if success
+   * @memberof Ethereum
+   */
+  public async getFeeData(): Promise<IFeeData> {
+    try {
+      const feeData = await this._web3.eth.calculateFeeData();
+      feeData.gasPrice = feeData.gasPrice < this._minGasPrice ? this._minGasPrice : feeData.gasPrice;
+      if (feeData.baseFeePerGas) {
+        feeData.maxFeePerGas = feeData.maxFeePerGas < this._minGasPrice ? this._minGasPrice : feeData.maxFeePerGas;
+        feeData.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas < this._minPriorityFeePerGas ? this._minPriorityFeePerGas : feeData.maxPriorityFeePerGas;
+      }
+      return feeData;
+    } catch (error) {
+      return { gasPrice: this._defaultGasPrice };
+    }
   }
 
   /**
@@ -286,31 +350,12 @@ export default class Ethereum {
    */
   public async getNonce(address: string): Promise<number> {
     address = Ethereum.prefix0x(address);
-    return new Promise((resolve, reject) => {
-      this._web3.eth.getTransactionCount(address, (err, res) => {
-        if (err) {
-          return reject(err);
-        }
-        const ethCount = res;
-        this._web3.currentProvider.send(
-          {
-            id: 1,
-            jsonrpc: "2.0",
-            method: "parity_nextNonce",
-            params: [address]
-          },
-          (error, response) => {
-            if (error) {
-              return reject(error);
-            }
-
-            const count = new BigNumber(response.result).toNumber();
-            const nonce = count > ethCount ? count : ethCount;
-            return resolve(nonce);
-          }
-        );
-      });
-    });
+    try {
+      const ethCount = await this._web3.eth.getTransactionCount(address);
+      return ethCount;
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
@@ -321,32 +366,44 @@ export default class Ethereum {
    * @memberof Ethereum
    */
   public async hasPendingTransactions(address: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      this._web3.currentProvider.send(
-        {
-          id: 1,
-          jsonrpc: "2.0",
-          method: "parity_pendingTransactions",
-          params: []
-        },
-        (err, res) => {
-          if (err) {
-            return reject(err);
-          }
-          address = Ethereum.prefix0x(address).toLowerCase();
-          let i = 0;
-          let hasPending = false;
-          for (i = 0; i < res.result.length; i++) {
-            const pending = res.result[i];
-            if (address.includes(pending.from.toLowerCase())) {
-              hasPending = true;
-              break;
-            }
-          }
-          return resolve(hasPending);
+    try {
+      const pendingList = await this._web3.eth.getPendingTransactions();
+      address = Ethereum.prefix0x(address).toLowerCase();
+      let hasPending = false;
+      for (const pending of pendingList) {
+        if (address.includes(pending.from.toLowerCase())) {
+          hasPending = true;
+          break;
         }
-      );
-    });
+      }
+      return hasPending;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * check if has pending block transaction
+   *
+   * @param {string} address
+   * @returns {Promise<boolean>} resolve true if has pending block transaction
+   * @memberof Ethereum
+   */
+  public async hasPendingBlockTransactions(address: string): Promise<boolean> {
+    try {
+      const pendingBlock = await this._web3.eth.getBlock("pending", true);
+      address = Ethereum.prefix0x(address).toLowerCase();
+      let hasPending = false;
+      for (const pending of pendingBlock.transactions) {
+        if (address.includes(pending.from.toLowerCase())) {
+          hasPending = true;
+          break;
+        }
+      }
+      return hasPending;
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
@@ -359,18 +416,47 @@ export default class Ethereum {
    * @param {number} gasPrice gas price
    * @param {string} value value
    * @param {string} calldata call data
-   * @returns {IEthereumTransaction}
+   * @returns {EthereumTransaction}
    * @memberof Ethereum
    */
-  public getTx(from: string, to: string, nonce: number, gasLimit: number, gasPrice: number, value: string, calldata: string): IEthereumTransaction {
+  public getTx(from: string, to: string, nonce: number, gasLimit: number, gasPrice: number, value: string, calldata: string): EthereumTransaction {
     const tx = {
       data: !calldata ? "0x0" : calldata,
       from,
-      gas: this._web3.utils.toHex(gasLimit),
-      gasPrice: this._web3.utils.toHex(gasPrice),
+      gas: this._web3.utils.numberToHex(gasLimit),
+      gasPrice: this._web3.utils.numberToHex(gasPrice),
       nonce,
       to,
-      value: value?.startsWith("0x") ? value : this._web3.utils.toHex(this._web3.utils.toWei(value + ""))
+      value: value?.startsWith("0x") ? value : this._web3.utils.numberToHex(this._web3.utils.toWei(value + "", "ether"))
+    };
+    // 在判断uint类型时，toHex条件判断似乎有问题，所以这里使用numberToHex
+    return tx;
+  }
+
+  /**
+   * format EIP1559 transaction info
+   *
+   * @param {string} from sender address
+   * @param {string} to destination address
+   * @param {number} nonce nonce
+   * @param {number} gasLimit gas limit
+   * @param {number} maxFeePerGas max fee per gas
+   * @param {number} maxPriorityFeePerGas max priority fee per gas
+   * @param {string} value value
+   * @param {string} calldata call data
+   * @returns {EthereumTransaction}
+   * @memberof Ethereum
+   */
+  public get1559Tx(from: string, to: string, nonce: number, gasLimit: number, maxFeePerGas: number, maxPriorityFeePerGas: number, value: string, calldata: string): EthereumTransaction {
+    const tx = {
+      from,
+      to,
+      nonce,
+      value: value?.startsWith("0x") ? value : this._web3.utils.numberToHex(this._web3.utils.toWei(value + "", "ether")),
+      gasLimit: this._web3.utils.numberToHex(gasLimit),
+      maxFeePerGas: this._web3.utils.numberToHex(maxFeePerGas),
+      maxPriorityFeePerGas: this._web3.utils.numberToHex(maxPriorityFeePerGas),
+      data: !calldata ? "0x0" : calldata
     };
     return tx;
   }
@@ -378,12 +464,12 @@ export default class Ethereum {
   /**
    * sign transaction with ethereum secret
    *
-   * @param {IEthereumTransaction} tx transaction
+   * @param {EthereumTransaction} tx transaction
    * @param {string} secret ethereum secret
    * @returns {Promise<string>} return signed info
    * @memberof Ethereum
    */
-  public async signTransaction(tx: IEthereumTransaction, secret: string): Promise<string> {
+  public async signTransaction(tx: EthereumTransaction, secret: string): Promise<string> {
     const signed = await this._web3.eth.accounts.signTransaction(tx, secret);
     return signed.rawTransaction;
   }
@@ -398,14 +484,12 @@ export default class Ethereum {
   public async sendSignedTransaction(sign: string): Promise<string> {
     // TODO: https://web3js.readthedocs.io/en/v1.2.4/callbacks-promises-events.html#promievent
     // sendSignedTransaction会自动绑定receipt等事件，在销毁实例时会抛出错误
-    return new Promise((resolve, reject) => {
-      this._web3.eth.sendSignedTransaction(sign, (err, hash) => {
-        if (err) {
-          return reject(err);
-        }
-        return resolve(hash);
-      });
-    });
+    try {
+      const txInfo = await this._web3.eth.sendSignedTransaction(sign);
+      return txInfo.transactionHash;
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
@@ -415,15 +499,13 @@ export default class Ethereum {
    * @returns {any} null or transaction object
    * @memberof Ethereum
    */
-  public getTransaction(hash: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      this._web3.eth.getTransaction(hash, (err: Error, data: any) => {
-        if (err) {
-          return reject(err);
-        }
-        return resolve(data);
-      });
-    });
+  public async getTransaction(hash: string): Promise<any> {
+    try {
+      const data = await this._web3.eth.getTransaction(hash);
+      return data;
+    } catch (error) {
+      throw error;
+    }
   }
   /**
    * get transaction receipt
@@ -432,15 +514,13 @@ export default class Ethereum {
    * @returns {any} null or transaction receipt object
    * @memberof Ethereum
    */
-  public getTransactionReceipt(hash: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      this._web3.eth.getTransactionReceipt(hash, (err: Error, data: any) => {
-        if (err) {
-          return reject(err);
-        }
-        return resolve(data);
-      });
-    });
+  public async getTransactionReceipt(hash: string): Promise<any> {
+    try {
+      const data = await this._web3.eth.getTransactionReceipt(hash);
+      return data;
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
@@ -451,7 +531,7 @@ export default class Ethereum {
    * @returns {Contract} return instance of ethereum or erc20 contract
    * @memberof Ethereum
    */
-  public contract(abi, address: string): Contract {
+  public contract(abi, address: string): Contract<ContractAbi> {
     return new this._web3.eth.Contract(abi, address);
   }
 
@@ -463,7 +543,7 @@ export default class Ethereum {
    * @returns {boolean} return true if initialied
    * @memberof Ethereum
    */
-  public contractInitialied(contract: Contract, address: string): boolean {
-    return contract instanceof contractClass && contract.options.address.toLowerCase() === address.toLowerCase();
+  public contractInitialied(contract: Contract<ContractAbi>, address: string): boolean {
+    return contract instanceof Contract && contract.options.address.toLowerCase() === address.toLowerCase();
   }
 }
