@@ -78,7 +78,8 @@ class ERC20 extends SmartContract {
   public async transfer(@isValidEthereumSecret secret: string, @isValidEthereumAddress to: string, @isValidAmount amount: string, nonce?: number): Promise<string> {
     const decimals = await this.decimals();
     const sender = Ethereum.getAddress(secret);
-    const value = this.ethereum.getWeb3().utils.toHex(new BigNumber(amount).multipliedBy(10 ** decimals).toString(10));
+    const web3 = this.ethereum.getWeb3();
+    const value = web3.utils.numberToHex(new BigNumber(amount).multipliedBy(10 ** decimals).toString(10));
     const gasPrice = await this.ethereum.getGasPrice();
     nonce = new BigNumber(nonce).isInteger() ? nonce : await this.ethereum.getNonce(sender);
     const calldata = await super.callABI("transfer", to, value);

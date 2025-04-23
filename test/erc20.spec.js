@@ -124,12 +124,6 @@ describe("test EtherFingate", function () {
       });
       const s3 = sandbox.stub(s2, "call");
       s3.resolves();
-      const s1 = sandbox.stub(inst._contract.methods, "transfer");
-      s1.returns({
-        encodeABI: function () {
-          return "0xa9059cbb0000000000000000000000003907acb4c1818adf72d965c08e0a79af16e7ffb8000000000000000000000000000000000000000000000000016345785d8a0000";
-        }
-      });
       const stub1 = sandbox.stub(inst._ethereum.getWeb3().eth, "getGasPrice");
       stub1.resolves("20000000000");
       const stub2 = sandbox.stub(inst._ethereum.getWeb3().eth, "getTransactionCount");
@@ -168,11 +162,6 @@ describe("test EtherFingate", function () {
       const s3 = sandbox.stub(s2, "call");
       s3.resolves();
       const s1 = sandbox.stub(inst._contract.methods, "transfer");
-      s1.returns({
-        encodeABI: function () {
-          return "0xa9059cbb0000000000000000000000003907acb4c1818adf72d965c08e0a79af16e7ffb8000000000000000000000000000000000000000000000000016345785d8a0000";
-        }
-      });
       const stub1 = sandbox.stub(inst._ethereum.getWeb3().eth, "getGasPrice");
       stub1.resolves("20000000000");
       const stub3 = sandbox.stub(inst._ethereum.getWeb3().eth, "sendSignedTransaction");

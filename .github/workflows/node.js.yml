@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x, 18.x]
+        node-version: [18.x,20.x,22.x]
 
     steps:
       - name: Checkout code
@@ -23,9 +23,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "npm"
       - name: Install dependencies
-        run: npm install
+        run: yarn
       - name: Run test:node
         run: npm run test:node
       - name: Run tslint
@@ -40,7 +39,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        node-version: [16.x, 18.x]
+        node-version: [18.x,20.x,22.x]
 
     runs-on: ${{ matrix.os }}
 
@@ -51,8 +50,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "npm"
-      - run: npm install
+      - run: yarn
       - name: Run headless test
         uses: GabrielBB/xvfb-action@v1.6
         with:

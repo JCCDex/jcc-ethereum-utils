@@ -1,4 +1,4 @@
-import EthereumABI from "jcc-ethereum-abi";
+import { Interface } from "@ethersproject/abi";
 import { Contract } from "web3-eth-contract";
 import Ethereum from "./ethereum";
 import { ContractAbi } from "web3-types";
@@ -52,7 +52,7 @@ class SmartContract {
    * @type {EthereumABI}
    * @memberof SmartContract
    */
-  private _ethereumABI: EthereumABI;
+  private interface: Interface;
 
   /**
    * Creates an instance of SmartContract
@@ -105,7 +105,7 @@ class SmartContract {
         this._ethereum = ethereum;
         this._abi = abi;
         this._contract = this._ethereum.contract(this._abi, this._address);
-        this._ethereumABI = new EthereumABI(this._contract);
+        this.interface = new Interface(this._abi);
       }
     } catch (e) {
       throw e;
@@ -126,13 +126,12 @@ class SmartContract {
    *
    */
   public async callABI(name, ...args) {
-    const abiItem = this._ethereumABI.getAbiItem.apply(null, [name, ...args]);
-    const { stateMutability } = abiItem;
-
+    const fragment = this.interface.getFunction(name);
+    const { stateMutability } = fragment;
     if (stateMutability === "view" || stateMutability === "pure") {
       return await this._contract.methods[name].apply(null, args).call();
     }
-    return this._ethereumABI.encode.apply(null, [name, ...args]);
+    return await this.interface.encodeFunctionData(name, args);
   }
 }
 

@@ -20,11 +20,11 @@
   "author": "JCCDex",
   "license": "Apache-2.0",
   "dependencies": {
+    "@ethersproject/abi": "^5.8.0",
     "@types/node": "^14.0.13",
     "bignumber.js": "^9.0.0",
-    "ethereumjs-tx": "^2.1.2",
     "jcc_wallet": "^4.0.3",
-    "jcc-ethereum-abi": "^0.2.0"
+    "web3": "~4.3.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
@@ -95,5 +95,6 @@
     "lib",
     "dist"
   ],
-  "sideEffects": false
+  "sideEffects": false,
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

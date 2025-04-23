@@ -1,6 +1,5 @@
 import BigNumber from "bignumber.js";
 import fingateABI from "./abi/fingateABI";
-import PromisifyBatchRequest from "./promisifyBatchRequest";
 import ERC20 from "./erc20";
 import Ethereum from "./ethereum";
 import SmartContract from "./smartContract";
@@ -161,7 +160,7 @@ class Fingate extends SmartContract {
     const decimals = await this._erc20.decimals();
     const web3 = this.ethereum.getWeb3();
     const sender = Ethereum.getAddress(secret);
-    const value = web3.utils.toHex(new BigNumber(amount).multipliedBy(10 ** decimals).toString(10));
+    const value = web3.utils.numberToHex(new BigNumber(amount).multipliedBy(10 ** decimals).toString(10));
     const gasPrice = await this.ethereum.getGasPrice();
     nonce = new BigNumber(nonce).isInteger() ? nonce : await this.ethereum.getNonce(sender);
     const calldata = await this._erc20.callABI("transfer", this.contractAddress, value);
@@ -170,14 +169,24 @@ class Fingate extends SmartContract {
     const hash = web3.utils.sha3(sign);
 
     const calldata1 = await super.callABI("depositToken", jtAddress, this._erc20.contractAddress, value, hash);
-    const tx1 = this.ethereum.getTx(sender, this.contractAddress, nonce + 1, 450000, gasPrice, "0", calldata1);
+    const tx1 = this.ethereum.getTx(sender, this.contractAddress, new BigNumber(nonce).plus(1).toNumber(), 450000, gasPrice, "0", calldata1);
     const sign1 = await this.ethereum.signTransaction(tx1, secret);
+    const batch = new web3.BatchRequest();
+    batch.add({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "eth_sendRawTransaction",
+      params: [sign]
+    });
+    batch.add({
+      jsonrpc: "2.0",
+      id: 2,
+      method: "eth_sendRawTransaction",
+      params: [sign1]
+    });
 
-    const batch = new PromisifyBatchRequest(web3.BatchRequest);
-    batch.add(web3.eth.sendSignedTransaction.request, sign);
-    batch.add(web3.eth.sendSignedTransaction.request, sign1);
     const receipts = await batch.execute();
-    return receipts;
+    return receipts.map(({ result }) => result);
   }
 }
 

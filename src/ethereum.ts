@@ -1,14 +1,9 @@
-"use strict";
-/// <reference path = "./types/transaction.ts" />
-/// <reference path = "./types/feeData.ts" />
-
-// import BigNumber from "bignumber.js";
 import { ethWallet } from "jcc_wallet";
 import { IWalletModel } from "jcc_wallet/lib/types";
 import { Contract } from "web3-eth-contract";
-const { Web3 } = require("web3");
-// const contractClass = require("web3-eth-contract");
 import { ContractAbi } from "web3-types";
+import { BigNumber } from "bignumber.js";
+const { Web3 } = require("web3");
 
 /**
  * Toolkit of Ethereum
@@ -315,7 +310,8 @@ export default class Ethereum {
   public async getGasPrice(): Promise<number> {
     try {
       const gasPrice = await this._web3.eth.getGasPrice();
-      return gasPrice < this._minGasPrice ? this._minGasPrice : gasPrice;
+      const bn = new BigNumber(gasPrice);
+      return bn.lte(this._minGasPrice) ? this._minGasPrice : bn.toNumber();
     } catch (error) {
       return this._defaultGasPrice;
     }
@@ -330,10 +326,14 @@ export default class Ethereum {
   public async getFeeData(): Promise<IFeeData> {
     try {
       const feeData = await this._web3.eth.calculateFeeData();
-      feeData.gasPrice = feeData.gasPrice < this._minGasPrice ? this._minGasPrice : feeData.gasPrice;
+      const gasPrice = new BigNumber(feeData.gasPrice);
+      feeData.gasPrice = gasPrice.lte(this._minGasPrice) ? this._minGasPrice : gasPrice.toNumber();
       if (feeData.baseFeePerGas) {
-        feeData.maxFeePerGas = feeData.maxFeePerGas < this._minGasPrice ? this._minGasPrice : feeData.maxFeePerGas;
-        feeData.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas < this._minPriorityFeePerGas ? this._minPriorityFeePerGas : feeData.maxPriorityFeePerGas;
+        const maxFeePerGas = new BigNumber(feeData.maxFeePerGas);
+        const maxPriorityFeePerGas = new BigNumber(feeData.maxPriorityFeePerGas);
+        feeData.baseFeePerGas = new BigNumber(feeData.baseFeePerGas).toNumber();
+        feeData.maxFeePerGas = maxFeePerGas.lte(this._minGasPrice) ? this._minGasPrice : maxFeePerGas.toNumber();
+        feeData.maxPriorityFeePerGas = maxPriorityFeePerGas.lte(this._minPriorityFeePerGas) ? this._minPriorityFeePerGas : maxPriorityFeePerGas.toNumber();
       }
       return feeData;
     } catch (error) {
@@ -352,7 +352,7 @@ export default class Ethereum {
     address = Ethereum.prefix0x(address);
     try {
       const ethCount = await this._web3.eth.getTransactionCount(address);
-      return ethCount;
+      return new BigNumber(ethCount).toNumber();
     } catch (error) {
       throw error;
     }
