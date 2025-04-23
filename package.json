@@ -22,7 +22,6 @@
   "dependencies": {
     "@types/node": "^14.0.13",
     "bignumber.js": "^9.0.0",
-    "ethereumjs-tx": "^2.1.2",
     "jcc_wallet": "^4.0.3",
     "jcc-ethereum-abi": "^0.2.0"
   },
