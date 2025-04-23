@@ -3,7 +3,8 @@ const webpackConfig = require("./webpack.config");
 module.exports = function (config) {
   config.set({
     frameworks: ["browserify", "detectBrowsers", "mocha"],
-    files: ["test/*.spec.js"],
+    // files: ["test/*.spec.js", "test/!ropsten.spec.js"],
+    files: ["test/!(ropsten).spec.js"],
     preprocessors: {
       "test/*.spec.js": ["webpack"]
     },
