@@ -6,6 +6,8 @@ const sinon = require("sinon");
 const sandbox = sinon.createSandbox();
 const config = require("./config");
 const { Contract } = require("web3-eth-contract");
+const { ERC20 } = require("../lib");
+const { Web3RequestManager } = require("web3-core");
 
 describe("test Fingate", function () {
   describe("test constructor", function () {
@@ -149,12 +151,6 @@ describe("test Fingate", function () {
     });
 
     it("deposit success without nonce", async function () {
-      const s1 = sandbox.stub(inst._contract.methods, "deposit");
-      s1.returns({
-        encodeABI: function () {
-          return "0xa26e1186000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000226a776e714b70584a594a5065416e5564565576334c666278694a68355a5658683739000000000000000000000000000000000000000000000000000000000000";
-        }
-      });
       const stub1 = sandbox.stub(inst._ethereum.getWeb3().eth, "getGasPrice");
       stub1.resolves("20000000000");
       const stub2 = sandbox.stub(inst._ethereum.getWeb3().eth, "getTransactionCount");
@@ -182,12 +178,6 @@ describe("test Fingate", function () {
     });
 
     it("deposit success with nonce", async function () {
-      const s1 = sandbox.stub(inst._contract.methods, "deposit");
-      s1.returns({
-        encodeABI: function () {
-          return "0xa26e1186000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000226a776e714b70584a594a5065416e5564565576334c666278694a68355a5658683739000000000000000000000000000000000000000000000000000000000000";
-        }
-      });
       const stub1 = sandbox.stub(inst._ethereum.getWeb3().eth, "getGasPrice");
       stub1.resolves("20000000000");
       const stub3 = sandbox.stub(inst._ethereum.getWeb3().eth, "sendSignedTransaction");
@@ -271,12 +261,6 @@ describe("test Fingate", function () {
     });
 
     it("depositToken success without nonce", async function () {
-      const s1 = sandbox.stub(inst._contract.methods, "deposit");
-      s1.returns({
-        encodeABI: function () {
-          return "0xcc2c516400000000000000000000000000000000000000000000000000000000000000800000000000000000000000009bd4810a407812042f938d2f69f673843301cfa6000000000000000000000000000000000000000000000000016345785d8a00006a7826f215bb65914c7676da64956e9bbf9c45c7c542a65dad80af8ebc355ed700000000000000000000000000000000000000000000000000000000000000226a776e714b70584a594a5065416e5564565576334c666278694a68355a5658683739000000000000000000000000000000000000000000000000000000000000";
-        }
-      });
       const stub1 = sandbox.stub(inst._ethereum.getWeb3().eth, "getGasPrice");
       stub1.resolves("20000000000");
       const stub2 = sandbox.stub(inst._ethereum.getWeb3().eth, "getTransactionCount");
@@ -304,12 +288,6 @@ describe("test Fingate", function () {
     });
 
     it("depositToken success with nonce", async function () {
-      const s1 = sandbox.stub(inst._contract.methods, "deposit");
-      s1.returns({
-        encodeABI: function () {
-          return "0xcc2c516400000000000000000000000000000000000000000000000000000000000000800000000000000000000000009bd4810a407812042f938d2f69f673843301cfa6000000000000000000000000000000000000000000000000016345785d8a00006a7826f215bb65914c7676da64956e9bbf9c45c7c542a65dad80af8ebc355ed700000000000000000000000000000000000000000000000000000000000000226a776e714b70584a594a5065416e5564565576334c666278694a68355a5658683739000000000000000000000000000000000000000000000000000000000000";
-        }
-      });
       const stub1 = sandbox.stub(inst._ethereum.getWeb3().eth, "getGasPrice");
       stub1.resolves("20000000000");
       const stub3 = sandbox.stub(inst._ethereum.getWeb3().eth, "sendSignedTransaction");
@@ -332,6 +310,147 @@ describe("test Fingate", function () {
       const hash = await inst.depositToken(config.JINGTUM_ADDRESS, config.JC_CONTRACT, 18, "0.1", config.MOCK_TRANSFER_HASH, config.ETHEREUM_SECRET, 0);
       expect(hash).to.equal(config.MOCK_HASH);
       expect(stub3.calledOnceWith(config.MOCK_DEPOSITTOKEN_SIGN)).to.true;
+    });
+  });
+
+  describe("test depositErc20", function () {
+    let inst;
+    before(function () {
+      inst = new Fingate();
+      const ethereum = new Ethereum(config.MOCK_NODE, true);
+      ethereum.initWeb3();
+      const erc20 = new ERC20();
+      erc20.init(config.JC_CONTRACT, ethereum);
+      inst.init(config.SC_ADDRESS, ethereum);
+      inst.initErc20(erc20);
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it("depositToken success without nonce", async function () {
+      const stub0 = sandbox.stub(inst._erc20, "decimals");
+      stub0.resolves(18);
+      const stub1 = sandbox.stub(inst._ethereum.getWeb3().eth, "getGasPrice");
+      stub1.resolves("20000000000");
+      const stub2 = sandbox.stub(inst._ethereum.getWeb3().eth, "getTransactionCount");
+      stub2.resolves(0n);
+      const stub3 = sandbox.stub(inst._ethereum.getWeb3().eth, "sendSignedTransaction");
+      stub3.resolves({ transactionHash: config.MOCK_HASH });
+      const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "send");
+      stub4.yields(null, 0);
+      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth, "getChainId");
+      stub5.resolves(1);
+      const stub6 = sandbox.stub(inst._ethereum.getWeb3().eth.net, "getId");
+      stub6.resolves(1);
+      const chainId = await inst._ethereum.getWeb3().eth.getChainId();
+      const networkId = await inst._ethereum.getWeb3().eth.net.getId();
+      const stub7 = sandbox.stub(inst._ethereum, "getTx");
+      stub7.callsFake(function (...arg) {
+        let tx = inst._ethereum.getTx.wrappedMethod.apply(this, arg);
+        tx.chainId = chainId;
+        tx.networkId = networkId;
+        return tx;
+      });
+      const stub8 = sandbox.stub(Web3RequestManager.prototype, "sendBatch");
+
+      stub8.resolves([
+        {
+          id: 1,
+          jsonrpc: "2.0",
+          result: "0xc93fe1983ef39bf9905b7ef60ea32946a44e07fcd540544f126033a256bbd8ea"
+        },
+        {
+          id: 2,
+          jsonrpc: "2.0",
+          result: "0xcfb7a8bbc28bfba5e4d66fec70b822eb98213dcf5e65b7b50867b858997593fa"
+        }
+      ]);
+
+      const hashes = await inst.depositErc20(config.ETHEREUM_SECRET, config.JINGTUM_ADDRESS, "1");
+      expect(
+        stub8.calledOnceWith([
+          {
+            jsonrpc: "2.0",
+            id: 1,
+            method: "eth_sendRawTransaction",
+            params: [
+              "0xf8aa808504a817c80083015f90949bd4810a407812042f938d2f69f673843301cfa680b844a9059cbb0000000000000000000000003907acb4c1818adf72d965c08e0a79af16e7ffb80000000000000000000000000000000000000000000000000de0b6b3a764000025a076ad1bb5bef18c238328d4bfad2778b0c2ef81444aa0e8928eeb4bdf56733b0ba0266a245e1dddd7d7ad76fe0230a4c68e73136964b62c1fcb1bb1cb24fe36c79e"
+            ]
+          },
+          {
+            jsonrpc: "2.0",
+            id: 2,
+            method: "eth_sendRawTransaction",
+            params: [
+              "0xf9014a018504a817c8008306ddd0943907acb4c1818adf72d965c08e0a79af16e7ffb880b8e4cc2c516400000000000000000000000000000000000000000000000000000000000000800000000000000000000000009bd4810a407812042f938d2f69f673843301cfa60000000000000000000000000000000000000000000000000de0b6b3a76400008e8503cd57cab1f456710e543b54bcd0ed54f90e2e9fb7b4c10beea8d09099b400000000000000000000000000000000000000000000000000000000000000226a776e714b70584a594a5065416e5564565576334c666278694a68355a565868373900000000000000000000000000000000000000000000000000000000000025a061c299e85cef3ba61399be3baf47a6adb6025e3afe9852ccd38672a193281b19a03fbcacb94d68d68e7a5182d893139dddb84fa6f2ba51c1cbf3f6c0114edb0e51"
+            ]
+          }
+        ])
+      ).to.true;
+      expect(hashes).to.deep.equal(["0xc93fe1983ef39bf9905b7ef60ea32946a44e07fcd540544f126033a256bbd8ea", "0xcfb7a8bbc28bfba5e4d66fec70b822eb98213dcf5e65b7b50867b858997593fa"]);
+    });
+
+    it("depositToken success with nonce", async function () {
+      const stub0 = sandbox.stub(inst._erc20, "decimals");
+      stub0.resolves(18);
+      const stub1 = sandbox.stub(inst._ethereum.getWeb3().eth, "getGasPrice");
+      stub1.resolves("20000000000");
+      const stub3 = sandbox.stub(inst._ethereum.getWeb3().eth, "sendSignedTransaction");
+      stub3.resolves({ transactionHash: config.MOCK_HASH });
+      const stub4 = sandbox.stub(inst._ethereum.getWeb3().currentProvider, "send");
+      stub4.yields(null, 0);
+      const stub5 = sandbox.stub(inst._ethereum.getWeb3().eth, "getChainId");
+      stub5.resolves(1);
+      const stub6 = sandbox.stub(inst._ethereum.getWeb3().eth.net, "getId");
+      stub6.resolves(1);
+      const chainId = await inst._ethereum.getWeb3().eth.getChainId();
+      const networkId = await inst._ethereum.getWeb3().eth.net.getId();
+      const stub7 = sandbox.stub(inst._ethereum, "getTx");
+      stub7.callsFake(function (...arg) {
+        let tx = inst._ethereum.getTx.wrappedMethod.apply(this, arg);
+        tx.chainId = chainId;
+        tx.networkId = networkId;
+        return tx;
+      });
+      const stub8 = sandbox.stub(Web3RequestManager.prototype, "sendBatch");
+
+      stub8.resolves([
+        {
+          id: 1,
+          jsonrpc: "2.0",
+          result: "0xc93fe1983ef39bf9905b7ef60ea32946a44e07fcd540544f126033a256bbd8ea"
+        },
+        {
+          id: 2,
+          jsonrpc: "2.0",
+          result: "0xcfb7a8bbc28bfba5e4d66fec70b822eb98213dcf5e65b7b50867b858997593fa"
+        }
+      ]);
+
+      const hashes = await inst.depositErc20(config.ETHEREUM_SECRET, config.JINGTUM_ADDRESS, "1", 0);
+      expect(
+        stub8.calledOnceWith([
+          {
+            jsonrpc: "2.0",
+            id: 1,
+            method: "eth_sendRawTransaction",
+            params: [
+              "0xf8aa808504a817c80083015f90949bd4810a407812042f938d2f69f673843301cfa680b844a9059cbb0000000000000000000000003907acb4c1818adf72d965c08e0a79af16e7ffb80000000000000000000000000000000000000000000000000de0b6b3a764000025a076ad1bb5bef18c238328d4bfad2778b0c2ef81444aa0e8928eeb4bdf56733b0ba0266a245e1dddd7d7ad76fe0230a4c68e73136964b62c1fcb1bb1cb24fe36c79e"
+            ]
+          },
+          {
+            jsonrpc: "2.0",
+            id: 2,
+            method: "eth_sendRawTransaction",
+            params: [
+              "0xf9014a018504a817c8008306ddd0943907acb4c1818adf72d965c08e0a79af16e7ffb880b8e4cc2c516400000000000000000000000000000000000000000000000000000000000000800000000000000000000000009bd4810a407812042f938d2f69f673843301cfa60000000000000000000000000000000000000000000000000de0b6b3a76400008e8503cd57cab1f456710e543b54bcd0ed54f90e2e9fb7b4c10beea8d09099b400000000000000000000000000000000000000000000000000000000000000226a776e714b70584a594a5065416e5564565576334c666278694a68355a565868373900000000000000000000000000000000000000000000000000000000000025a061c299e85cef3ba61399be3baf47a6adb6025e3afe9852ccd38672a193281b19a03fbcacb94d68d68e7a5182d893139dddb84fa6f2ba51c1cbf3f6c0114edb0e51"
+            ]
+          }
+        ])
+      ).to.true;
+      expect(hashes).to.deep.equal(["0xc93fe1983ef39bf9905b7ef60ea32946a44e07fcd540544f126033a256bbd8ea", "0xcfb7a8bbc28bfba5e4d66fec70b822eb98213dcf5e65b7b50867b858997593fa"]);
     });
   });
 });
