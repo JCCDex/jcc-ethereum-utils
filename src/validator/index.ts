@@ -36,6 +36,14 @@ export const isValidAmount = (target: any, name: string, index: number) => {
   setTarget(target, name, index, checkAmountKey);
 };
 
+// Sanitize untrusted values before embedding in error messages to prevent
+// log injection (OWASP A03). Truncate to 100 chars and strip control chars.
+const sanitize = (value: unknown): string => {
+  return String(value)
+    .replace(/[\r\n\t]/g, " ")
+    .substring(0, 100);
+};
+
 export const validate = (target: any, name: string, descriptor: PropertyDescriptor) => {
   const method = descriptor.value;
 
@@ -53,28 +61,28 @@ export const validate = (target: any, name: string, descriptor: PropertyDescript
               value = "0x0000000000000000000000000000000000000000";
             }
             if (!ethWallet.isValidAddress(value)) {
-              throw new Error(`${value} is invalid ethereum address.`);
+              throw new Error(`${sanitize(value)} is invalid ethereum address.`);
             }
             break;
           case checkEthereumSecretKey:
             if (!ethWallet.isValidSecret(value)) {
-              throw new Error(`${value} is invalid ethereum secret.`);
+              throw new Error(`${sanitize(value)} is invalid ethereum secret.`);
             }
             break;
           case checkAmountKey:
             const bn = new BigNumber(value);
             if (!BigNumber.isBigNumber(bn) || !bn.isGreaterThan(0)) {
-              throw new Error(`${value} is invalid amount.`);
+              throw new Error(`${sanitize(value)} is invalid amount.`);
             }
             break;
           case checkHashKey:
             if (!/^0x([A-Fa-f0-9]{64})$/.test(value)) {
-              throw new Error(`${value} is invalid hash.`);
+              throw new Error(`${sanitize(value)} is invalid hash.`);
             }
             break;
           case checkJingtumAddressKey:
             if (!jtWallet.isValidAddress(value)) {
-              throw new Error(`${value} is invalid jingtum address.`);
+              throw new Error(`${sanitize(value)} is invalid jingtum address.`);
             }
             break;
           /* istanbul ignore next */

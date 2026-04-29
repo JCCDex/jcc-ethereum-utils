@@ -1,7 +1,8 @@
 const DuplicatePackageCheckerPlugin = require("duplicate-package-checker-webpack-plugin");
 const path = require("path");
+const webpack = require("webpack");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 
 const config = {
   entry: "./lib",
@@ -14,6 +15,13 @@ const config = {
   target: "web",
   resolve: {
     extensions: [".js", ".ts"],
+    fallback: {
+      fs: false,
+      tls: false,
+      child_process: false,
+      net: false,
+      buffer: require.resolve("buffer/")
+    },
     alias: {
       scryptsy: path.resolve(__dirname, "node_modules/scryptsy"),
       "scrypt.js": path.resolve(__dirname, "node_modules/scrypt.js"),
@@ -32,12 +40,6 @@ const config = {
     extensions: [".js", ".json", ".ts"]
   },
   mode: process.env.MODE === "dev" ? "development" : "production",
-  node: {
-    fs: "empty",
-    tls: "empty",
-    child_process: "empty",
-    net: "empty"
-  },
   module: {
     rules: [
       {
@@ -51,29 +53,28 @@ const config = {
       }
     ]
   },
-  plugins: [new DuplicatePackageCheckerPlugin()]
+  optimization: {
+    minimize: process.env.MODE !== "dev",
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          compress: {
+            sequences: true,
+            dead_code: true,
+            drop_console: true,
+            drop_debugger: true,
+            unused: true
+          }
+        },
+        parallel: true
+      })
+    ]
+  },
+  plugins: [new DuplicatePackageCheckerPlugin(), new webpack.ProvidePlugin({ Buffer: ["buffer", "Buffer"] })]
 };
 
 if (process.env.REPORT === "true") {
   config.plugins.push(new BundleAnalyzerPlugin());
-}
-
-if (process.env.MODE !== "dev") {
-  config.plugins.push(
-    new UglifyJsPlugin({
-      uglifyOptions: {
-        compress: {
-          sequences: true,
-          dead_code: true,
-          drop_console: true,
-          drop_debugger: true,
-          unused: true
-        }
-      },
-      sourceMap: false,
-      parallel: true
-    })
-  );
 }
 
 module.exports = config;

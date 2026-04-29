@@ -22,7 +22,8 @@ class Fingate extends SmartContract {
    */
   private _etherGasLimit: number;
 
-  private _erc20: ERC20;
+  // Initialized via initErc20() before any method that requires it is called.
+  private _erc20!: ERC20;
 
   /**
    * Creates an instance of ERC20
@@ -94,7 +95,7 @@ class Fingate extends SmartContract {
   public async depositState(@isValidEthereumAddress address: string, @isValidEthereumAddress contractAddress = "0x0000000000000000000000000000000000000000"): Promise<(BigNumber | string)[]> {
     address = Ethereum.prefix0x(address);
     const state = await super.callABI("depositState", contractAddress, address);
-    return state;
+    return state as (BigNumber | string)[];
   }
 
   /**
@@ -110,10 +111,10 @@ class Fingate extends SmartContract {
   @validate
   public async deposit(@isValidEthereumSecret secret: string, @isValidJingtumAddress jingtumAddress: string, @isValidAmount amount: string, nonce?: number): Promise<string> {
     const address = Ethereum.getAddress(secret);
-    const calldata = await super.callABI("deposit", jingtumAddress);
+    const calldata = (await super.callABI("deposit", jingtumAddress)) as string;
     const gasPrice = await this.ethereum.getGasPrice();
-    nonce = new BigNumber(nonce).isInteger() ? nonce : await this.ethereum.getNonce(address);
-    const tx = this.ethereum.getTx(address, this.contractAddress, nonce, this.etherGasLimit, gasPrice, amount, calldata);
+    const resolvedNonce: number = nonce !== undefined && new BigNumber(nonce).isInteger() ? nonce : await this.ethereum.getNonce(address);
+    const tx = this.ethereum.getTx(address, this.contractAddress, resolvedNonce, this.etherGasLimit, gasPrice, amount, calldata);
     const sign = await this.ethereum.signTransaction(tx, secret);
     const hash = await this.ethereum.sendSignedTransaction(sign);
     return hash;
@@ -136,10 +137,10 @@ class Fingate extends SmartContract {
   public async depositToken(@isValidJingtumAddress jtAddress: string, @isValidEthereumAddress tokenAddress: string, decimals: number, @isValidAmount amount: string, @isValidHash hash: string, @isValidEthereumSecret secret: string, nonce?: number): Promise<string> {
     const value = this.ethereum.getWeb3().utils.numberToHex(new BigNumber(amount).multipliedBy(10 ** decimals).toString(10));
     const address = Ethereum.getAddress(secret);
-    nonce = new BigNumber(nonce).isInteger() ? nonce : await this.ethereum.getNonce(address);
+    const resolvedNonce: number = nonce !== undefined && new BigNumber(nonce).isInteger() ? nonce : await this.ethereum.getNonce(address);
     const gasPrice = await this.ethereum.getGasPrice();
-    const calldata = await super.callABI("depositToken", jtAddress, tokenAddress, value, hash);
-    const tx = this.ethereum.getTx(address, this.contractAddress, nonce, 450000, gasPrice, "0", calldata);
+    const calldata = (await super.callABI("depositToken", jtAddress, tokenAddress, value, hash)) as string;
+    const tx = this.ethereum.getTx(address, this.contractAddress, resolvedNonce, 450000, gasPrice, "0", calldata);
     const sign = await this.ethereum.signTransaction(tx, secret);
     const txHash = await this.ethereum.sendSignedTransaction(sign);
     return txHash;
@@ -162,14 +163,14 @@ class Fingate extends SmartContract {
     const sender = Ethereum.getAddress(secret);
     const value = web3.utils.numberToHex(new BigNumber(amount).multipliedBy(10 ** decimals).toString(10));
     const gasPrice = await this.ethereum.getGasPrice();
-    nonce = new BigNumber(nonce).isInteger() ? nonce : await this.ethereum.getNonce(sender);
-    const calldata = await this._erc20.callABI("transfer", this.contractAddress, value);
-    const tx = this.ethereum.getTx(sender, this._erc20.contractAddress, nonce, 90000, gasPrice, "0", calldata);
+    const resolvedNonce: number = nonce !== undefined && new BigNumber(nonce).isInteger() ? nonce : await this.ethereum.getNonce(sender);
+    const calldata = (await this._erc20.callABI("transfer", this.contractAddress, value)) as string;
+    const tx = this.ethereum.getTx(sender, this._erc20.contractAddress, resolvedNonce, 90000, gasPrice, "0", calldata);
     const sign = await this.ethereum.signTransaction(tx, secret);
     const hash = web3.utils.sha3(sign);
 
-    const calldata1 = await super.callABI("depositToken", jtAddress, this._erc20.contractAddress, value, hash);
-    const tx1 = this.ethereum.getTx(sender, this.contractAddress, new BigNumber(nonce).plus(1).toNumber(), 450000, gasPrice, "0", calldata1);
+    const calldata1 = (await super.callABI("depositToken", jtAddress, this._erc20.contractAddress, value, hash)) as string;
+    const tx1 = this.ethereum.getTx(sender, this.contractAddress, new BigNumber(resolvedNonce).plus(1).toNumber(), 450000, gasPrice, "0", calldata1);
     const sign1 = await this.ethereum.signTransaction(tx1, secret);
     const batch = new web3.BatchRequest();
     batch.add({
@@ -186,7 +187,7 @@ class Fingate extends SmartContract {
     });
 
     const receipts = await batch.execute();
-    return receipts.map(({ result }) => result);
+    return receipts.map(({ result }: { result: string }) => result);
   }
 }
 

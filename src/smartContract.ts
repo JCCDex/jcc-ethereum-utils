@@ -16,7 +16,7 @@ class SmartContract {
    * @type {Contract}
    * @memberof SmartContract
    */
-  private _contract: Contract<ContractAbi>;
+  private _contract: Contract<ContractAbi> | null;
 
   /**
    * instance of abi
@@ -34,7 +34,7 @@ class SmartContract {
    * @type {Ethereum}
    * @memberof SmartContract
    */
-  private _ethereum: Ethereum;
+  private _ethereum: Ethereum | null;
 
   /**
    * contract address of smart contract
@@ -43,16 +43,16 @@ class SmartContract {
    * @type {string}
    * @memberof SmartContract
    */
-  private _address: string;
+  private _address: string | null;
 
   /**
-   * EthereumABI instance
+   * EthereumABI instance — set in init(), always present when callABI is invoked
    *
    * @private
-   * @type {EthereumABI}
+   * @type {Interface}
    * @memberof SmartContract
    */
-  private interface: Interface;
+  private interface!: Interface;
 
   /**
    * Creates an instance of SmartContract
@@ -72,7 +72,7 @@ class SmartContract {
    * @memberof SmartContract
    */
   public get ethereum(): Ethereum {
-    return this._ethereum;
+    return this._ethereum!;
   }
 
   /**
@@ -82,12 +82,12 @@ class SmartContract {
    * @type {Contract}
    * @memberof SmartContract
    */
-  public get contract(): Contract<ContractAbi> {
+  public get contract(): Contract<ContractAbi> | null {
     return this._contract;
   }
 
   public get contractAddress(): string {
-    return this._contract.options.address;
+    return this._contract!.options.address!;
   }
 
   /**
@@ -118,18 +118,23 @@ class SmartContract {
    * @memberof SmartContract
    */
   public destroy() {
-    this._contract = null;
+    this._contract = null as unknown as Contract<ContractAbi>;
   }
 
   /**
    * call defined function in the abi
    *
    */
-  public async callABI(name, ...args) {
+  public async callABI(name: string, ...args: unknown[]) {
+    // Validate that `name` exists in the ABI before dynamic property access,
+    // preventing injection of arbitrary method names.
     const fragment = this.interface.getFunction(name);
+    if (!fragment) {
+      throw new Error(`${name} is not defined in the contract ABI.`);
+    }
     const { stateMutability } = fragment;
     if (stateMutability === "view" || stateMutability === "pure") {
-      return await this._contract.methods[name].apply(null, args).call();
+      return await this._contract!.methods[name](...args).call();
     }
     return await this.interface.encodeFunctionData(name, args);
   }

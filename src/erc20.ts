@@ -46,7 +46,7 @@ class ERC20 extends SmartContract {
    * @memberof ERC20
    */
   public async decimals(): Promise<number> {
-    const decimals = await super.callABI("decimals");
+    const decimals = (await super.callABI("decimals")) as string;
     return parseInt(decimals, 10);
   }
 
@@ -58,7 +58,7 @@ class ERC20 extends SmartContract {
    * @memberof ERC20
    */
   public async balanceOf(address: string): Promise<string> {
-    const bnBalance = await super.callABI("balanceOf", address);
+    const bnBalance = (await super.callABI("balanceOf", address)) as string;
     const decimals = await this.decimals();
     const balance = new BigNumber(bnBalance).dividedBy(10 ** decimals).toString(10);
     return balance;
@@ -81,9 +81,9 @@ class ERC20 extends SmartContract {
     const web3 = this.ethereum.getWeb3();
     const value = web3.utils.numberToHex(new BigNumber(amount).multipliedBy(10 ** decimals).toString(10));
     const gasPrice = await this.ethereum.getGasPrice();
-    nonce = new BigNumber(nonce).isInteger() ? nonce : await this.ethereum.getNonce(sender);
-    const calldata = await super.callABI("transfer", to, value);
-    const tx = this.ethereum.getTx(sender, this.contractAddress, nonce, 90000, gasPrice, "0", calldata);
+    const resolvedNonce: number = nonce !== undefined && new BigNumber(nonce).isInteger() ? nonce : await this.ethereum.getNonce(sender);
+    const calldata = (await super.callABI("transfer", to, value)) as string;
+    const tx = this.ethereum.getTx(sender, this.contractAddress, resolvedNonce, 90000, gasPrice, "0", calldata);
     const sign = await this.ethereum.signTransaction(tx, secret);
     const hash = await this.ethereum.sendSignedTransaction(sign);
     return hash;

@@ -192,7 +192,7 @@ export default class Ethereum {
    * @memberof Ethereum
    */
   public static getAddress(secret: string): string {
-    return ethWallet.getAddress(secret);
+    return ethWallet.getAddress!(secret);
   }
 
   /**
@@ -203,7 +203,7 @@ export default class Ethereum {
    * @memberof Ethereum
    */
   public static createWallet(): IWalletModel {
-    return ethWallet.createWallet();
+    return ethWallet.createWallet!();
   }
 
   /**
@@ -243,6 +243,17 @@ export default class Ethereum {
    */
   public initWeb3() {
     if (!this._web3 || !this._web3.currentProvider) {
+      // Only allow safe transport schemes to prevent protocol-injection attacks.
+      const allowedSchemes = ["http:", "https:", "ws:", "wss:"];
+      let parsedUrl: URL;
+      try {
+        parsedUrl = new URL(this._node);
+      } catch {
+        throw new Error(`Invalid node URL: ${this._node}`);
+      }
+      if (!allowedSchemes.includes(parsedUrl.protocol)) {
+        throw new Error(`Unsupported URL scheme "${parsedUrl.protocol}". Allowed: http, https, ws, wss.`);
+      }
       this._web3 = new Web3(new Web3.providers.HttpProvider(this._node));
     }
   }
@@ -482,10 +493,14 @@ export default class Ethereum {
    * @memberof Ethereum
    */
   public async sendSignedTransaction(sign: string): Promise<string> {
-    // TODO: https://web3js.readthedocs.io/en/v1.2.4/callbacks-promises-events.html#promievent
     // sendSignedTransaction会自动绑定receipt等事件，在销毁实例时会抛出错误
     try {
       const txInfo = await this._web3.eth.sendSignedTransaction(sign);
+      // Explicitly check on-chain execution status. A falsy status means the
+      // transaction was mined but reverted, which must be surfaced to callers.
+      if (txInfo.status === false || txInfo.status === BigInt(0)) {
+        throw new Error(`Transaction reverted on-chain: ${txInfo.transactionHash}`);
+      }
       return txInfo.transactionHash;
     } catch (error) {
       throw error;
@@ -531,7 +546,7 @@ export default class Ethereum {
    * @returns {Contract} return instance of ethereum or erc20 contract
    * @memberof Ethereum
    */
-  public contract(abi, address: string): Contract<ContractAbi> {
+  public contract(abi: ContractAbi, address: string): Contract<ContractAbi> {
     return new this._web3.eth.Contract(abi, address);
   }
 
@@ -543,7 +558,7 @@ export default class Ethereum {
    * @returns {boolean} return true if initialied
    * @memberof Ethereum
    */
-  public contractInitialied(contract: Contract<ContractAbi>, address: string): boolean {
-    return contract instanceof Contract && contract.options.address.toLowerCase() === address.toLowerCase();
+  public contractInitialied(contract: Contract<ContractAbi> | null, address: string): boolean {
+    return contract instanceof Contract && !!contract.options.address && contract.options.address.toLowerCase() === address.toLowerCase();
   }
 }
